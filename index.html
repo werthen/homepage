@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,700&family=Source+Sans+3:wght@300;400;600&family=Roboto+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* include padding in element sizing to avoid accidental overflow */
+        *, *::before, *::after { box-sizing: border-box; }
         body {
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
             margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
-            color: white;
+            padding: 28px;
+            background: linear-gradient(180deg, #f7f5ef 0%, #f1efe6 100%);
+            color: #1f2d1f;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -19,34 +21,40 @@
             justify-content: center;
         }
         .container {
-            max-width: 1200px;
+            max-width: 1100px;
             width: 100%;
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: auto auto auto;
-            gap: 20px;
+            gap: 22px;
+            padding: 8px;
+            position: relative;
+        }
+        /* subtle paper grain overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: radial-gradient(rgba(0,0,0,0.015) 0.5px, transparent 0.6px);
+            background-size: 6px 6px;
+            opacity: 0.55;
+            mix-blend-mode: multiply;
         }
         .widget {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.1s ease;
+            background: linear-gradient(180deg, #fffef8 0%, #fbfaf3 100%);
+            border-radius: 8px;
+            padding: 20px 20px 18px 20px;
+            box-shadow: 0 6px 18px rgba(33,40,33,0.06);
+            border: 1px solid rgba(32,42,32,0.06);
+            transition: transform 0.12s ease, box-shadow 0.12s ease;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            background-image: linear-gradient(transparent 0%, transparent 92%, rgba(230,230,220,0.6) 92%); /* subtle ruled bottom line */
         }
-        .container:hover .widget {
-            filter: blur(2px);
-            transform: scale(0.98);
-        }
-        .container:hover .widget:hover {
-            filter: none;
-            transform: scale(1.02);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
-        }
+        .container:hover .widget { transform: scale(0.996); filter: none; }
+        .container:hover .widget:hover { transform: scale(1.01); box-shadow: 0 12px 30px rgba(34,45,34,0.08); }
         .clock {
             grid-column: 1 / 2;
             grid-row: 1 / 2;
@@ -56,6 +64,39 @@
             grid-column: 2 / 3;
             grid-row: 1 / 2;
             text-align: center;
+        }
+        .pomodoro .pomodoro-controls { margin-top: 10px; }
+        .pomodoro .icon-btn {
+            background: linear-gradient(180deg, #eef7ec, #e6f1e1);
+            color: #1f3b1f;
+            border: 1px solid rgba(30,50,30,0.08);
+            box-shadow: 0 2px 6px rgba(28,38,28,0.04);
+        }
+        .pomodoro .icon-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(28,38,28,0.06); }
+        .pomodoro .icon-btn i { color: #1f3b1f; }
+        .pomodoro-timer.editable-duration {
+            background: transparent;
+            color: #16321a;
+            border-bottom: 1px dashed rgba(22,50,22,0.08);
+            padding-bottom: 6px;
+            position: relative;
+            display: inline-block;
+        }
+        .pomodoro-timer.editable-duration:focus { outline: none; border-bottom: 1px dotted rgba(22,50,22,0.12); }
+        .pomodoro-timer.editable-duration:focus::after {
+            content: 'EDIT';
+            position: absolute;
+            right: -8px;
+            top: -12px;
+            font-family: 'Merriweather', serif;
+            font-size: 0.68rem;
+            padding: 4px 6px;
+            background: linear-gradient(180deg, #f0faee, #e6f3e6);
+            color: #16321a;
+            border: 1px solid rgba(22,50,22,0.08);
+            border-radius: 6px;
+            box-shadow: 0 4px 8px rgba(20,30,20,0.06);
+            transform: rotate(-6deg);
         }
         .weather {
             grid-column: 1 / 2;
@@ -68,27 +109,28 @@
         }
         .clock-display {
             font-family: 'Roboto Mono', monospace;
-            font-size: 4em;
-            font-weight: bold;
-            margin-bottom: 10px;
+            font-size: 3.6rem;
+            font-weight: 600;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
+            color: #16321a;
         }
         .digit {
-            display: inline-block;
-            transition: transform 0.18s ease;
-            line-height: 1;
             position: relative;
+            display:inline-block;
+            width: 0.9ch;
+            height: 1.05em;
             overflow: hidden;
-            width: 1ch;
             text-align: center;
+            line-height: 1.05em;
         }
         .anim-digit {
             display: block;
             width: 100%;
-            transition: transform 0.18s ease;
+            transition: transform 110ms cubic-bezier(.2,.9,.2,1);
             will-change: transform;
         }
         .colon {
@@ -96,26 +138,24 @@
             line-height: 1;
         }
         .date-display {
-            font-size: 1.5em;
-            opacity: 0.8;
+            font-family: 'Merriweather', serif;
+            font-size: 1.05rem;
+            opacity: 0.85;
+            color: #2b3a2b;
         }
         .pomodoro-timer {
-            font-size: 3em;
-            font-weight: bold;
-            margin-bottom: 20px;
+            font-family: 'Merriweather', serif;
+            font-size: 2.4rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #183218;
         }
         .pomodoro-controls button {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            margin: 5px;
+            padding: 6px;
+            margin: 6px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: background 0.3s;
-        }
-        .pomodoro-controls button:hover {
-            background: rgba(255, 255, 255, 0.3);
+            transition: transform 0.12s ease, box-shadow 0.12s ease;
         }
         .pomodoro-controls {
             display: flex;
@@ -131,23 +171,21 @@
         }
         .editable-duration {
             display: inline-block;
-            min-width: 34px;
-            padding: 4px 6px;
+            min-width: 46px;
+            padding: 6px 8px;
             margin-left: 6px;
-            border-radius: 6px;
-            background: rgba(255,255,255,0.04);
-            color: white;
+            border-radius: 4px;
+            background: transparent;
+            color: #16321a;
             text-align: center;
             outline: none;
             cursor: text;
             user-select: text;
-            caret-color: #fff;
+            caret-color: #16321a;
             font-family: 'Roboto Mono', monospace;
+            border-bottom: 1px dotted rgba(22,50,22,0.06);
         }
-        .editable-duration:focus {
-            background: rgba(255,255,255,0.12);
-            box-shadow: 0 0 0 3px rgba(255,255,255,0.03) inset;
-        }
+        .editable-duration:focus { box-shadow: none; }
         .icon-btn {
             background: rgba(255,255,255,0.08);
             border: none;
@@ -166,30 +204,35 @@
             height: 20px;
             fill: white;
         }
-        .weather-info {
-            text-align: center;
+        .weather-info { text-align: center; }
+        .weather-temp { font-size: 2rem; font-weight: 700; color: #18421a; }
+        .weather-desc { font-size: 1rem; opacity: 0.85; color: #304030; }
+        .youtube-wrapper {
+            position: relative;
+            padding-top: 56.25%;
+            overflow: hidden;
+            border-radius: 10px;
+            background: linear-gradient(180deg, rgba(230,240,230,0.6), rgba(245,248,245,0.6));
+            border: 1px solid rgba(32,42,32,0.04);
         }
-        .weather-temp {
-            font-size: 3em;
-            font-weight: bold;
-        }
-        .weather-desc {
-            font-size: 1.2em;
-            opacity: 0.8;
-        }
-        iframe {
+        .youtube-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            border-radius: 15px;
-            border: none;
+            border: 0;
+            border-radius: 10px;
         }
         .greeting {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 1.5em;
-            font-weight: 300;
-            opacity: 0.9;
+            top: 22px;
+            left: 24px;
+            font-family: 'Merriweather', serif;
+            font-size: 1.25rem;
+            font-weight: 400;
+            color: #2a3a2a;
+            opacity: 0.95;
         }
         @media (max-width: 768px) {
             .container {
@@ -200,6 +243,29 @@
                 grid-column: 1 / -1;
             }
         }
+        /* quote text displayed at the bottom of the page content, aligned right */
+        .quote-rotator {
+            display: block;
+            /* margin: 18px 20px 48px auto; right-aligned with a 20px gap from the edge */
+            position: absolute;
+            bottom: 28px;
+            right: 28px;
+            max-height: 75px;
+            max-width: 360px;
+            padding: 0;
+            font-family: 'Merriweather', serif;
+            color: #16321a;
+            opacity: 0.98;
+            transition: transform 0.12s ease, opacity 0.12s ease;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            text-align: right; /* ensure author aligns neatly */
+        }
+        .quote-rotator .quote { font-size: 0.95rem; line-height: 1.3; opacity: 0; transition: opacity 600ms ease, transform 600ms cubic-bezier(.2,.9,.2,1); transform: translateY(6px); background: transparent; padding: 0; margin: 0; }
+        .quote-rotator .quote.active { opacity: 1; transform: translateY(0); }
+        .quote-rotator .author { font-size: 0.82rem; margin-top: 6px; color: #2b3a2b; font-family: 'Source Sans 3', sans-serif; }
+        .quote-rotator:hover { transform: translateY(-2px); }
     </style>
 </head>
 <body>
@@ -230,8 +296,13 @@
             </div>
         </div>
         <div class="widget youtube">
-            <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="https://www.youtube.com/embed/XxEhuSJF780?rel=0" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="accelerometer *; clipboard-write *; encrypted-media *; gyroscope *; picture-in-picture *; web-share *;" referrerpolicy="strict-origin"></iframe></div>
+            <div class="youtube-wrapper"><iframe src="https://www.youtube.com/embed/KLPApSRku8Y?rel=0" allowfullscreen scrolling="no" allow="accelerometer *; clipboard-write *; encrypted-media *; gyroscope *; picture-in-picture *; web-share *;" referrerpolicy="strict-origin"></iframe></div>
         </div>
+        </div>
+    </div>
+
+    <div class="quote-rotator" id="quote-rotator" aria-live="polite">
+        <div class="quote" id="quote-content"><div class="text"></div><div class="author"></div></div>
     </div>
 
     <script>
@@ -504,6 +575,63 @@
         // YouTube Player - You can change the playlist ID to your preferred ambient music
         // For now, using a placeholder. Replace with actual ambient music playlist
         // Example: https://www.youtube.com/embed/videoseries?list=PLAYLIST_ID
+    </script>
+    <script>
+        // JS-driven quote rotator (replaces content from an internal array)
+        (function(){
+            const QUOTES = [
+                {text: 'Deep work is the ability to focus without distraction on a cognitively demanding task.', author: 'Cal Newport'},
+                {text: 'Concentration is the secret of strength.', author: 'Ralph Waldo Emerson'},
+                {text: 'You do your best work when you are doing what you love.', author: 'Toni Morrison'},
+                {text: 'The trick is to enjoy life. Don’t wish away your days, waiting for better ones.', author: 'Marjorie Pay Hinckley'}
+            ];
+
+            const container = document.getElementById('quote-rotator');
+            const content = document.getElementById('quote-content');
+            const textEl = content.querySelector('.text');
+            const authorEl = content.querySelector('.author');
+            if (!container || !content) return;
+
+            let idx = 0;
+            let timer = null;
+            const ROTATE_MS = 12000;
+
+            function render(i) {
+                const q = QUOTES[i];
+                // fade out
+                content.classList.remove('active');
+                setTimeout(() => {
+                    textEl.textContent = q.text;
+                    authorEl.textContent = '— ' + q.author;
+                    // fade in
+                    content.classList.add('active');
+                }, 250);
+            }
+
+            function next() {
+                idx = (idx + 1) % QUOTES.length;
+                render(idx);
+            }
+
+            function start() {
+                stop();
+                timer = setInterval(next, ROTATE_MS);
+            }
+
+            function stop() {
+                if (timer) { clearInterval(timer); timer = null; }
+            }
+
+            // initial render
+            render(0);
+            start();
+
+            container.addEventListener('mouseenter', stop);
+            container.addEventListener('mouseleave', start);
+
+            // expose for debugging if needed
+            window._quoteRotator = {start, stop, next, render};
+        })();
     </script>
 </body>
 </html>
