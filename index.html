@@ -219,6 +219,35 @@
             color: #2a3a2a;
             opacity: 0.95;
         }
+        /* settings cog */
+        .settings-cog {
+            position: absolute;
+            top: 18px;
+            right: 20px;
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg,#f6faf4,#eef7ec);
+            border: 1px solid rgba(30,45,30,0.06);
+            cursor: pointer;
+            box-shadow: 0 6px 12px rgba(8,12,8,0.04);
+        }
+        .settings-cog i { color: #16321a; font-size: 18px; }
+
+        /* modal */
+        .settings-modal-backdrop { position: fixed; inset: 0; background: rgba(10,12,8,0.35); display: none; align-items: center; justify-content: center; z-index: 1200; }
+        .settings-modal { background: #fffef8; border-radius: 10px; padding: 18px; width: 420px; max-width: calc(100% - 40px); box-shadow: 0 12px 40px rgba(10,12,8,0.16); border: 1px solid rgba(32,42,32,0.06); }
+        .settings-modal h3 { margin: 0 0 8px 0; font-family: 'Merriweather', serif; }
+        .settings-row { margin-bottom: 12px; }
+        .settings-row label { display:block; font-size:0.9rem; margin-bottom:6px; color:#2b3a2b; }
+        .settings-row input[type="text"] { width:100%; padding:8px 10px; border-radius:6px; border:1px solid rgba(30,40,30,0.07); }
+        .settings-actions { display:flex; gap:8px; justify-content:flex-end; }
+        .settings-actions button { padding:8px 12px; border-radius:6px; border:none; cursor:pointer; }
+        .btn-ghost { background:transparent; border:1px solid rgba(30,40,30,0.06); }
+        .btn-primary { background:linear-gradient(180deg,#e6f1e1,#dff0d9); border:1px solid rgba(22,50,22,0.08); }
         @media (max-width: 768px) {
             .container {
                 grid-template-columns: 1fr;
@@ -255,6 +284,24 @@
 </head>
 <body>
     <div class="greeting" id="greeting">Good morning, Lorin</div>
+    <div class="settings-cog" id="settings-cog" title="Settings">
+        <i class="fa-solid fa-cog"></i>
+    </div>
+
+    <div class="settings-modal-backdrop" id="settings-backdrop" aria-hidden="true">
+        <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+            <h3 id="settings-title">Settings</h3>
+            <div class="settings-row">
+                <label for="youtube-url">YouTube video URL or ID</label>
+                <input type="text" id="youtube-url" placeholder="https://www.youtube.com/watch?v=..."> 
+            </div>
+            <div class="settings-actions">
+                <button class="btn-ghost" id="settings-cancel">Cancel</button>
+                <button class="btn-ghost" id="settings-reset">Reset to default</button>
+                <button class="btn-primary" id="settings-save">Save</button>
+            </div>
+        </div>
+    </div>
     <div class="container">
         <div class="widget clock">
             <div class="clock-display" id="clock">
@@ -281,7 +328,7 @@
             </div>
         </div>
         <div class="widget youtube">
-            <div class="youtube-wrapper"><iframe src="https://www.youtube.com/embed/KLPApSRku8Y?rel=0" allowfullscreen scrolling="no" allow="accelerometer *; clipboard-write *; encrypted-media *; gyroscope *; picture-in-picture *; web-share *;" referrerpolicy="strict-origin"></iframe></div>
+            <div class="youtube-wrapper"><iframe id="youtube-iframe" data-default-id="KLPApSRku8Y" src="https://www.youtube.com/embed/KLPApSRku8Y?rel=0" allowfullscreen scrolling="no" allow="accelerometer *; clipboard-write *; encrypted-media *; gyroscope *; picture-in-picture *; web-share *;" referrerpolicy="strict-origin"></iframe></div>
         </div>
         </div>
     </div>
@@ -560,6 +607,69 @@
         // YouTube Player - You can change the playlist ID to your preferred ambient music
         // For now, using a placeholder. Replace with actual ambient music playlist
         // Example: https://www.youtube.com/embed/videoseries?list=PLAYLIST_ID
+    </script>
+    <script>
+        // Settings: YouTube preference persisted in localStorage
+        (function(){
+            const COG = document.getElementById('settings-cog');
+            const BACKDROP = document.getElementById('settings-backdrop');
+            const SAVE = document.getElementById('settings-save');
+            const CANCEL = document.getElementById('settings-cancel');
+            const RESET = document.getElementById('settings-reset');
+            const INPUT = document.getElementById('youtube-url');
+            const IFRAME = document.getElementById('youtube-iframe');
+            const LS_KEY = 'preferred_youtube_id';
+
+            function parseYouTubeId(input) {
+                if (!input) return null;
+                input = input.trim();
+                // if looks like an ID (11+ chars alnum-_)
+                const idMatch = input.match(/[A-Za-z0-9_-]{11,}/);
+                if (idMatch) return idMatch[0];
+                return null;
+            }
+
+            function setIframeById(id) {
+                if (!id) return;
+                IFRAME.src = `https://www.youtube.com/embed/${id}?rel=0`;
+            }
+
+            function openSettings() {
+                const saved = localStorage.getItem(LS_KEY);
+                INPUT.value = saved || IFRAME.dataset.defaultId || '';
+                BACKDROP.style.display = 'flex';
+                BACKDROP.setAttribute('aria-hidden','false');
+                INPUT.focus();
+            }
+
+            function closeSettings() {
+                BACKDROP.style.display = 'none';
+                BACKDROP.setAttribute('aria-hidden','true');
+            }
+
+            COG.addEventListener('click', openSettings);
+            CANCEL.addEventListener('click', closeSettings);
+            BACKDROP.addEventListener('click', (e)=> { if (e.target === BACKDROP) closeSettings(); });
+
+            SAVE.addEventListener('click', () => {
+                const id = parseYouTubeId(INPUT.value);
+                if (!id) { alert('Please paste a YouTube URL or ID.'); return; }
+                localStorage.setItem(LS_KEY, id);
+                setIframeById(id);
+                closeSettings();
+            });
+
+            RESET.addEventListener('click', () => {
+                const defaultId = IFRAME.dataset.defaultId;
+                localStorage.removeItem(LS_KEY);
+                setIframeById(defaultId);
+                INPUT.value = defaultId || '';
+            });
+
+            // on load, apply saved id if present
+            const saved = localStorage.getItem(LS_KEY);
+            if (saved) setIframeById(saved);
+        })();
     </script>
     <script>
         // JS-driven quote rotator (replaces content from an internal array)
