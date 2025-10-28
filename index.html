@@ -171,6 +171,7 @@
             border-bottom: 1px dotted rgba(22,50,22,0.06);
         }
         .editable-duration:focus { box-shadow: none; }
+    .editable-duration.disabled { opacity: 0.6; cursor: default; }
         .icon-btn {
             background: rgba(255,255,255,0.08);
             border: none;
@@ -464,6 +465,9 @@
         function startTimer() {
             if (!isRunning) {
                 isRunning = true;
+                // disable inline editing while running
+                const tEl = document.getElementById('timer');
+                if (tEl) { tEl.setAttribute('contenteditable', 'false'); tEl.classList.add('disabled'); }
                 timerInterval = setInterval(() => {
                     timeLeft--;
                     updateTimerDisplay();
@@ -489,6 +493,9 @@
         function pauseTimer() {
             clearInterval(timerInterval);
             isRunning = false;
+            // re-enable inline editing while paused
+            const tElPause = document.getElementById('timer');
+            if (tElPause) { tElPause.setAttribute('contenteditable', 'true'); tElPause.classList.remove('disabled'); }
         }
 
         function resetTimer() {
@@ -498,6 +505,8 @@
             isWork = true;
             document.getElementById('status').textContent = 'Work Session';
             updateTimerDisplay();
+            const tElReset = document.getElementById('timer');
+            if (tElReset) { tElReset.setAttribute('contenteditable', 'true'); tElReset.classList.remove('disabled'); }
         }
         // wire new controls
     const toggleBtn = document.getElementById('toggle');
@@ -533,14 +542,16 @@
 
         const timerEl = document.getElementById('timer');
         if (timerEl) {
-            timerEl.addEventListener('focus', () => {
-                // pause while editing
-                if (isRunning) pauseTimer();
+            timerEl.addEventListener('focus', (ev) => {
+                // don't allow entering edit mode while running
+                if (isRunning) { ev.target.blur(); return; }
                 // select all
                 document.execCommand('selectAll', false, null);
             });
 
             timerEl.addEventListener('keydown', (e) => {
+                // if running, block all editing keys
+                if (isRunning) { e.preventDefault(); return; }
                 // allow digits, colon, backspace, delete, arrows, enter, tab
                 const allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Enter','Tab',':'];
                 if (allowed.includes(e.key)) return;
