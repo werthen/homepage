@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
             font-family: 'Montserrat', sans-serif;
@@ -116,6 +117,55 @@
         .pomodoro-controls button:hover {
             background: rgba(255, 255, 255, 0.3);
         }
+        .pomodoro-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .pomodoro-adjust label {
+            font-size: 0.9em;
+            margin-right: 8px;
+            opacity: 0.95;
+        }
+        .editable-duration {
+            display: inline-block;
+            min-width: 34px;
+            padding: 4px 6px;
+            margin-left: 6px;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.04);
+            color: white;
+            text-align: center;
+            outline: none;
+            cursor: text;
+            user-select: text;
+            caret-color: #fff;
+            font-family: 'Roboto Mono', monospace;
+        }
+        .editable-duration:focus {
+            background: rgba(255,255,255,0.12);
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.03) inset;
+        }
+        .icon-btn {
+            background: rgba(255,255,255,0.08);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+        }
+        .icon-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
         .weather-info {
             text-align: center;
         }
@@ -162,23 +212,25 @@
             <div class="date-display" id="date">Monday, October 28, 2025</div>
         </div>
         <div class="widget pomodoro">
-            <div class="pomodoro-timer" id="timer">25:00</div>
+            <div class="pomodoro-timer editable-duration" id="timer" contenteditable="true" tabindex="0">25:00</div>
             <div class="pomodoro-controls">
-                <button id="start">Start</button>
-                <button id="pause">Pause</button>
-                <button id="reset">Reset</button>
+                <button id="toggle" class="icon-btn" title="Start/Pause">
+                    <i id="toggle-icon" class="fa-solid fa-play"></i>
+                </button>
+                <button id="reset" class="icon-btn" title="Reset">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
             </div>
             <div id="status">Work Session</div>
         </div>
         <div class="widget weather">
-            <h2>Today's Weather</h2>
             <div class="weather-info" id="weather-info">
                 <div class="weather-temp">--°C</div>
                 <div class="weather-desc">Loading...</div>
             </div>
         </div>
         <div class="widget youtube">
-            <iframe id="youtube-player" src="https://www.youtube.com/embed/KLPApSRku8Y" allowfullscreen></iframe>
+            <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;"><iframe src="https://www.youtube.com/embed/XxEhuSJF780?rel=0" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen scrolling="no" allow="accelerometer *; clipboard-write *; encrypted-media *; gyroscope *; picture-in-picture *; web-share *;" referrerpolicy="strict-origin"></iframe></div>
         </div>
     </div>
 
@@ -293,10 +345,12 @@
         updateClock();
 
         // Pomodoro Timer
-        let timerInterval;
-        let timeLeft = 25 * 60; // 25 minutes in seconds
-        let isWork = true;
-        let isRunning = false;
+    let timerInterval;
+    let workDuration = 25 * 60;
+    let breakDuration = 5 * 60;
+    let timeLeft = workDuration; // in seconds
+    let isWork = true;
+    let isRunning = false;
 
         function updateTimerDisplay() {
             const minutes = Math.floor(timeLeft / 60);
@@ -314,11 +368,11 @@
                         clearInterval(timerInterval);
                         isRunning = false;
                         if (isWork) {
-                            timeLeft = 5 * 60; // 5 minute break
+                            timeLeft = breakDuration; // break
                             isWork = false;
                             document.getElementById('status').textContent = 'Break Time';
                         } else {
-                            timeLeft = 25 * 60; // back to work
+                            timeLeft = workDuration; // back to work
                             isWork = true;
                             document.getElementById('status').textContent = 'Work Session';
                         }
@@ -337,16 +391,95 @@
         function resetTimer() {
             clearInterval(timerInterval);
             isRunning = false;
-            timeLeft = 25 * 60;
+            timeLeft = workDuration;
             isWork = true;
             document.getElementById('status').textContent = 'Work Session';
             updateTimerDisplay();
         }
+        // wire new controls
+    const toggleBtn = document.getElementById('toggle');
+    const toggleIcon = document.getElementById('toggle-icon');
+    const resetBtn = document.getElementById('reset');
 
-        document.getElementById('start').addEventListener('click', startTimer);
-        document.getElementById('pause').addEventListener('click', pauseTimer);
-        document.getElementById('reset').addEventListener('click', resetTimer);
+        function updateToggleIcon() {
+            if (isRunning) {
+                toggleIcon.className = 'fa-solid fa-pause';
+            } else {
+                toggleIcon.className = 'fa-solid fa-play';
+            }
+        }
+
+        function parseTimerTextToSeconds(text) {
+            if (!text) return null;
+            const t = text.trim();
+            // accept MM:SS or M:SS or MM
+            const parts = t.split(':');
+            if (parts.length === 1) {
+                const m = parseInt(parts[0].replace(/[^0-9]/g,''), 10);
+                if (isNaN(m)) return null;
+                return m * 60;
+            }
+            if (parts.length === 2) {
+                const m = parseInt(parts[0].replace(/[^0-9]/g,''), 10);
+                const s = parseInt(parts[1].replace(/[^0-9]/g,''), 10);
+                if (isNaN(m) || isNaN(s)) return null;
+                return m * 60 + Math.max(0, Math.min(59, s));
+            }
+            return null;
+        }
+
+        const timerEl = document.getElementById('timer');
+        if (timerEl) {
+            timerEl.addEventListener('focus', () => {
+                // pause while editing
+                if (isRunning) pauseTimer();
+                // select all
+                document.execCommand('selectAll', false, null);
+            });
+
+            timerEl.addEventListener('keydown', (e) => {
+                // allow digits, colon, backspace, delete, arrows, enter, tab
+                const allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Enter','Tab',':'];
+                if (allowed.includes(e.key)) return;
+                if (/^[0-9]$/.test(e.key)) return;
+                e.preventDefault();
+            });
+
+            timerEl.addEventListener('blur', () => {
+                const secs = parseTimerTextToSeconds(timerEl.textContent || '');
+                if (secs !== null) {
+                    workDuration = secs;
+                    timeLeft = secs;
+                    updateTimerDisplay();
+                } else {
+                    // revert to previous
+                    updateTimerDisplay();
+                }
+            });
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            // if user edited timer, parse and apply before starting
+            const secs = parseTimerTextToSeconds(timerEl ? (timerEl.textContent || '') : '');
+            if (secs !== null) {
+                workDuration = secs;
+                // if not running, set current timeLeft to the edited value
+                if (!isRunning) timeLeft = secs;
+            }
+            if (isRunning) pauseTimer();
+            else startTimer();
+            updateToggleIcon();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            resetTimer();
+            updateToggleIcon();
+        });
+        // initialize icon
+        updateToggleIcon();
         updateTimerDisplay();
+
+        // Editable durations handlers removed — timer is edited inline via the timer element
 
         // Weather
         async function fetchWeather() {
