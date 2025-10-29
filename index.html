@@ -132,6 +132,10 @@
             opacity: 0.85;
             color: #2b3a2b;
         }
+        /* hide seconds when the clock has .no-seconds */
+        .clock-display.no-seconds #s1,
+        .clock-display.no-seconds #s2,
+        .clock-display.no-seconds #colon2 { display: none; }
         .pomodoro-timer {
             font-family: 'Merriweather', serif;
             font-size: 2.4rem;
@@ -299,6 +303,9 @@
             <div class="settings-row">
                 <label for="youtube-url">YouTube video URL or ID</label>
                 <input type="text" id="youtube-url" placeholder="https://www.youtube.com/watch?v=..."> 
+            </div>
+            <div class="settings-row">
+                <label for="show-seconds"><input type="checkbox" id="show-seconds"> Show seconds in clock</label>
             </div>
             <div class="settings-actions">
                 <button class="btn-ghost" id="settings-cancel">Cancel</button>
@@ -632,8 +639,11 @@
             const CANCEL = document.getElementById('settings-cancel');
             const RESET = document.getElementById('settings-reset');
             const INPUT = document.getElementById('youtube-url');
+            const SHOW_SECONDS = document.getElementById('show-seconds');
             const IFRAME = document.getElementById('youtube-iframe');
+            const CLOCK = document.getElementById('clock');
             const LS_KEY = 'preferred_youtube_id';
+            const LS_KEY_SHOW = 'show_seconds';
 
             function parseYouTubeId(input) {
                 if (!input) return null;
@@ -649,11 +659,22 @@
                 IFRAME.src = `https://www.youtube.com/embed/${id}?rel=0`;
             }
 
+            function applyShowSeconds(shouldShow) {
+                if (!CLOCK) return;
+                if (shouldShow) CLOCK.classList.remove('no-seconds');
+                else CLOCK.classList.add('no-seconds');
+            }
+
             function openSettings() {
                 const saved = localStorage.getItem(LS_KEY);
+                const savedShow = localStorage.getItem(LS_KEY_SHOW);
                 INPUT.value = saved || IFRAME.dataset.defaultId || '';
+                // default: show seconds (true) when no preference set
+                const show = (savedShow === null) ? true : (savedShow === 'true');
+                SHOW_SECONDS.checked = show;
                 BACKDROP.style.display = 'flex';
                 BACKDROP.setAttribute('aria-hidden','false');
+                // focus the input for convenience
                 INPUT.focus();
             }
 
@@ -667,8 +688,19 @@
             BACKDROP.addEventListener('click', (e)=> { if (e.target === BACKDROP) closeSettings(); });
 
             SAVE.addEventListener('click', () => {
-                const id = parseYouTubeId(INPUT.value);
-                if (!id) { alert('Please paste a YouTube URL or ID.'); return; }
+                // persist show-seconds regardless of the YouTube input
+                const showVal = !!SHOW_SECONDS.checked;
+                localStorage.setItem(LS_KEY_SHOW, showVal ? 'true' : 'false');
+                applyShowSeconds(showVal);
+
+                // YouTube id is optional here; only save/apply if provided
+                const raw = (INPUT.value || '').trim();
+                if (raw === '') {
+                    closeSettings();
+                    return;
+                }
+                const id = parseYouTubeId(raw);
+                if (!id) { alert('Please paste a valid YouTube URL or ID.'); return; }
                 localStorage.setItem(LS_KEY, id);
                 setIframeById(id);
                 closeSettings();
@@ -677,13 +709,20 @@
             RESET.addEventListener('click', () => {
                 const defaultId = IFRAME.dataset.defaultId;
                 localStorage.removeItem(LS_KEY);
+                localStorage.removeItem(LS_KEY_SHOW);
                 setIframeById(defaultId);
                 INPUT.value = defaultId || '';
+                // reset seconds to default (show)
+                SHOW_SECONDS.checked = true;
+                applyShowSeconds(true);
             });
 
-            // on load, apply saved id if present
+            // on load, apply saved id and show-seconds preference if present
             const saved = localStorage.getItem(LS_KEY);
             if (saved) setIframeById(saved);
+            const savedShow = localStorage.getItem(LS_KEY_SHOW);
+            const show = (savedShow === null) ? true : (savedShow === 'true');
+            applyShowSeconds(show);
         })();
     </script>
     <script>
