@@ -744,10 +744,44 @@
         // JS-driven quote rotator (replaces content from an internal array)
         (function(){
             const QUOTES = [
-                {text: 'Deep work is the ability to focus without distraction on a cognitively demanding task.', author: 'Cal Newport'},
-                {text: 'Concentration is the secret of strength.', author: 'Ralph Waldo Emerson'},
-                {text: 'You do your best work when you are doing what you love.', author: 'Toni Morrison'},
-                {text: 'The trick is to enjoy life. Don’t wish away your days, waiting for better ones.', author: 'Marjorie Pay Hinckley'}
+                {text: 'The future depends on what you do today.', author: 'Mahatma Gandhi'},
+                {text: 'Success is the sum of small efforts, repeated day in and day out.', author: 'Robert Collier'},
+                {text: 'Discipline is choosing between what you want now and what you want most.', author: 'Abraham Lincoln'},
+                {text: 'You don’t have to be extreme, just consistent.', author: 'Unknown'},
+                {text: 'Work hard in silence, let success make the noise.', author: 'Frank Ocean'},
+                {text: 'Clarity comes from engagement, not thought.', author: 'Marie Forleo'},
+                {text: 'Start where you are. Use what you have. Do what you can.', author: 'Arthur Ashe'},
+                {text: 'We are what we repeatedly do. Excellence, then, is not an act but a habit.', author: 'Aristotle'},
+                {text: 'Small daily improvements over time lead to stunning results.', author: 'Robin Sharma'},
+                {text: 'Dream big. Start small. Act now.', author: 'Robin Sharma'},
+                {text: 'Energy flows where attention goes.', author: 'Tony Robbins'},
+                {text: 'Don’t count the days, make the days count.', author: 'Muhammad Ali'},
+                {text: 'What you do every day matters more than what you do once in a while.', author: 'Gretchen Rubin'},
+                {text: 'Consistency is more important than intensity.', author: 'James Clear'},
+                {text: 'The best way to predict your future is to create it.', author: 'Peter Drucker'},
+                {text: 'Action is the foundational key to all success.', author: 'Pablo Picasso'},
+                {text: 'The secret of getting ahead is getting started.', author: 'Mark Twain'},
+                {text: 'You become what you give your attention to.', author: 'Epictetus'},
+                {text: 'Clarity of focus is the foundation of mastery.', author: 'Robin Sharma'},
+                {text: 'The quality of your attention determines the quality of your work.', author: 'Unknown'},
+                {text: 'Depth, not speed, is where progress lives.', author: 'Cal Newport'},
+                {text: 'Do less, but better.', author: 'Greg McKeown'},
+                {text: 'Simplicity is the ultimate sophistication.', author: 'Leonardo da Vinci'},
+                {text: 'Mastery is the art of focusing on what matters and letting go of what doesn’t.', author: 'Unknown'},
+                {text: 'Distraction is the enemy of depth.', author: 'Cal Newport'},
+                {text: 'Craftsmanship is devotion to detail, even when no one is watching.', author: 'Unknown'},
+                {text: 'Slow down. Focus deeply. Move deliberately.', author: 'Unknown'},
+                {text: 'Excellence is born from attention, not ambition.', author: 'Unknown'},
+                {text: 'The deep life is not lived by default; it is built intentionally.', author: 'Cal Newport'},
+                {text: 'Focus is a muscle. It strengthens with use and atrophies with neglect.', author: 'Unknown'},
+                {text: 'Do the work that only you can do.', author: 'Paul Graham'},
+                {text: 'Don’t chase opportunities. Build competence so opportunities chase you.', author: 'Cal Newport'},
+                {text: 'The pursuit of mastery is the path to meaning.', author: 'Robert Greene'},
+                {text: 'Concentration is the currency of progress.', author: 'Unknown'},
+                {text: 'What you choose to ignore defines you as much as what you pursue.', author: 'Unknown'},
+                {text: 'Attention is the rarest and purest form of generosity.', author: 'Simone Weil'},
+                {text: 'Work deeply. Rest deeply. Live deliberately.', author: 'Henry David Thoreau'},
+                {text: 'Discipline is freedom.', author: 'Jocko Willink'}
             ];
 
             const container = document.getElementById('quote-rotator');
@@ -756,7 +790,11 @@
             const authorEl = content.querySelector('.author');
             if (!container || !content) return;
 
-            let idx = 0;
+            function randomIndex() {
+                return Math.floor(Math.random() * QUOTES.length);
+            }
+
+            let idx = randomIndex();
             let timer = null;
             const ROTATE_MS = 12000;
 
@@ -773,8 +811,7 @@
             }
 
             function next() {
-                idx = (idx + 1) % QUOTES.length;
-                render(idx);
+                render(randomIndex());
             }
 
             function start() {
@@ -787,7 +824,7 @@
             }
 
             // initial render
-            render(0);
+            render(idx);
 
             // Greeting name persistence: load stored name and wire up inline editing save
             (function(){
