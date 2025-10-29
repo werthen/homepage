@@ -228,6 +228,8 @@
             color: #2a3a2a;
             opacity: 0.95;
         }
+        .greeting [contenteditable] { padding: 0 3px; border-radius: 4px; min-width: 40px; display: inline-block; }
+        .greeting [contenteditable]:focus { outline: 2px solid rgba(34,88,34,0.12); background: rgba(240,245,240,0.6); }
         /* settings cog */
         .settings-cog {
             position: absolute;
@@ -292,7 +294,7 @@
     </style>
 </head>
 <body>
-    <div class="greeting" id="greeting">Good morning, Lorin</div>
+    <div class="greeting" id="greeting">Good morning, <span id="greeting-name" contenteditable="true" tabindex="0">Lorin</span></div>
     <div class="settings-cog" id="settings-cog" title="Settings">
         <i class="fa-solid fa-cog"></i>
     </div>
@@ -374,16 +376,29 @@
             const weekNum = getWeekNumber(now);
             document.getElementById('date').textContent = `${date} - Week ${weekNum}`;
 
-            // Update greeting
-            const hour = now.getHours();
-            let greeting = 'Good ';
-            if (hour < 6) greeting += 'night';
-            else if (hour < 12) greeting += 'morning';
-            else if (hour < 18) greeting += 'afternoon';
-            else if (hour < 22) greeting += 'evening';
-            else greeting += 'night';
-            greeting += ', Lorin';
-            document.getElementById('greeting').textContent = greeting;
+                // Update greeting prefix but preserve the editable name span
+                const hour = now.getHours();
+                let prefix = 'Good ';
+                if (hour < 6) prefix += 'night';
+                else if (hour < 12) prefix += 'morning';
+                else if (hour < 18) prefix += 'afternoon';
+                else if (hour < 22) prefix += 'evening';
+                else prefix += 'night';
+                // find greeting container and update only the prefix text node
+                const greetingEl = document.getElementById('greeting');
+                const nameSpan = document.getElementById('greeting-name');
+                if (greetingEl) {
+                    // If the first child is a text node containing the prefix, update it; otherwise reconstruct safely
+                    const first = greetingEl.firstChild;
+                    const desired = `${prefix}, `;
+                    if (first && first.nodeType === Node.TEXT_NODE) first.textContent = desired;
+                    else {
+                        // clear and re-append
+                        greetingEl.innerHTML = '';
+                        greetingEl.appendChild(document.createTextNode(desired));
+                        if (nameSpan) greetingEl.appendChild(nameSpan);
+                    }
+                }
 
             // Animate changing digits (fixed sequencing: old slides up, then new slides in from below)
             const digitIds = ['h1', 'h2', 'colon1', 'm1', 'm2', 'colon2', 's1', 's2'];
@@ -773,6 +788,33 @@
 
             // initial render
             render(0);
+
+            // Greeting name persistence: load stored name and wire up inline editing save
+            (function(){
+                const NAME_KEY = 'greeting_name';
+                const nameSpan = document.getElementById('greeting-name');
+                if (!nameSpan) return;
+                // Initialize from storage if present
+                const stored = localStorage.getItem(NAME_KEY);
+                if (stored !== null && stored.trim() !== '') nameSpan.textContent = stored;
+
+                // Save helper
+                function saveName() {
+                    const val = (nameSpan.textContent || '').trim();
+                    if (val === '') return; // don't save empty names
+                    localStorage.setItem(NAME_KEY, val);
+                }
+
+                // Blur saves
+                nameSpan.addEventListener('blur', () => saveName());
+                // Enter saves and blurs (prevent newline)
+                nameSpan.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        nameSpan.blur();
+                    }
+                });
+            })();
             start();
 
             container.addEventListener('mouseenter', stop);
