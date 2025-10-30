@@ -344,6 +344,17 @@
             <div class="settings-row">
                 <label for="enable-tilt"><input type="checkbox" id="enable-tilt"> Enable 3D tilt on cards</label>
             </div>
+            <div class="settings-row">
+                <label for="enable-wiggle"><input type="checkbox" id="enable-wiggle"> Enable wiggle on cards (subtle)</label>
+            </div>
+            <div class="settings-row">
+                <label for="enable-wiggle-intensity">Wiggle intensity</label>
+                <select id="enable-wiggle-intensity">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
             <div class="settings-actions">
                 <button class="btn-ghost" id="settings-cancel">Cancel</button>
                 <button class="btn-ghost" id="settings-reset">Reset to default</button>
@@ -416,11 +427,24 @@
                     raf: null
                 };
 
+                // per-widget wiggle state (autonomous subtle motion)
+                w._wiggle = {
+                    phase: Math.random() * Math.PI * 2,
+                    ampX: 0.5 + Math.random() * 0.9, // px horizontal
+                    ampY: 0.6 + Math.random() * 1.0, // px vertical
+                    speed: 0.45 + Math.random() * 0.6 // speed factor
+                };
+
+                // global intensity (1.0 default) applied multiplicatively to wiggle amps
+                window._wiggleIntensity = window._wiggleIntensity || 1.0;
+
                 function lerp(a, b, t) { return a + (b - a) * t; }
 
-                function applyTransform(c) {
-                    // apply inline transform using numeric units
-                    var transform = 'perspective(800px) translateZ(' + c.tz.toFixed(2) + 'px) rotateX(' + c.rx.toFixed(2) + 'deg) rotateY(' + c.ry.toFixed(2) + 'deg) scale(' + c.scale.toFixed(3) + ')';
+                function applyTransform(c, wigX, wigY) {
+                    // apply inline transform using numeric units; wigX/wigY are pixel offsets
+                    wigX = wigX || 0;
+                    wigY = wigY || 0;
+                    var transform = 'perspective(800px) translate3d(' + wigX.toFixed(2) + 'px,' + wigY.toFixed(2) + 'px,' + c.tz.toFixed(2) + 'px) rotateX(' + c.rx.toFixed(2) + 'deg) rotateY(' + c.ry.toFixed(2) + 'deg) scale(' + c.scale.toFixed(3) + ')';
                     w.style.transform = transform;
                 }
 
@@ -430,12 +454,27 @@
                     var tar = w._tilt.target;
                     cur.rx = lerp(cur.rx, tar.rx, t);
                     cur.ry = lerp(cur.ry, tar.ry, t);
-                    cur.tz = lerp(cur.tz, tar.tz, t);
-                    cur.scale = lerp(cur.scale, tar.scale, t);
-                    applyTransform(cur);
-                    // stop RAF if near target and not active
+                    cur.tz = lerp(cur.tz, tar.tz, 0.12);
+                    cur.scale = lerp(cur.scale, tar.scale, 0.08);
+
+                    // compute wiggle offsets if enabled and user doesn't prefer reduced motion
+                    var wiggleEnabled = !document.body.classList.contains('wiggle-disabled') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    var wigX = 0, wigY = 0;
+                    if (wiggleEnabled) {
+                        var s = w._wiggle;
+                        var now = performance.now() / 1000;
+                        var phase = s.phase + now * s.speed;
+                        var inten = (typeof window._wiggleIntensity === 'number') ? window._wiggleIntensity : 1.0;
+                        // apply intensity multiplier
+                        wigX = Math.sin(phase) * s.ampX * inten;
+                        wigY = Math.cos(phase * 0.92) * s.ampY * inten;
+                    }
+
+                    applyTransform(cur, wigX, wigY);
+
+                    // stop RAF only if we're near the tilt target and wiggle is disabled
                     var near = Math.abs(cur.rx - tar.rx) < 0.05 && Math.abs(cur.ry - tar.ry) < 0.05 && Math.abs(cur.tz - tar.tz) < 0.5 && Math.abs(cur.scale - tar.scale) < 0.005;
-                    if (near && !w.classList.contains('is-active')) {
+                    if (near && !w.classList.contains('is-active') && !wiggleEnabled) {
                         w._tilt.raf = null;
                         // final reset
                         w.style.transform = '';
@@ -445,12 +484,13 @@
                 }
 
                 function startLoop() { if (!w._tilt.raf) w._tilt.raf = requestAnimationFrame(tick); }
+                // expose start helper so external callers (like settings) can start the widget's RAF loop
+                w._tilt.start = startLoop;
 
                 // pointer handlers
                 w.addEventListener('pointerenter', function(){
                     setActive(w);
-                    if (document.body.classList.contains('tilt-disabled')) return;
-                    startLoop();
+                    if (!document.body.classList.contains('tilt-disabled')) startLoop();
                 });
                 w.addEventListener('pointerleave', function(){
                     w._tilt.target = { rx: 0, ry: 0, tz: 0, scale: 1 };
@@ -478,6 +518,12 @@
                 w.addEventListener('blur', function(){ w._tilt.target = { rx:0, ry:0, tz:0, scale:1 }; clearActive(); });
                 w.addEventListener('pointercancel', function(){ w._tilt.target = { rx:0, ry:0, tz:0, scale:1 }; clearActive(); });
             });
+
+            // expose helper to start wiggle loops for all widgets (used when enabling wiggle in settings)
+            window._cardControls = window._cardControls || {};
+            window._cardControls.startAllWiggles = function() {
+                widgets.forEach(function(w){ try { if (w && w._tilt && typeof w._tilt.start === 'function') w._tilt.start(); } catch(e){} });
+            };
 
             // Also remove the class if the user clicks outside any widget (safety)
             document.addEventListener('pointerdown', function(e){
@@ -793,6 +839,8 @@
             const LS_KEY = 'preferred_youtube_id';
             const LS_KEY_SHOW = 'show_seconds';
             const LS_KEY_TILT = 'ui_enable_tilt';
+            const LS_KEY_WIGGLE = 'ui_enable_wiggle';
+            const LS_KEY_WIGGLE_INTENSITY = 'ui_wiggle_intensity';
 
             function parseYouTubeId(input) {
                 if (!input) return null;
@@ -824,6 +872,13 @@
                 const tiltSaved = localStorage.getItem(LS_KEY_TILT);
                 const tiltOn = (tiltSaved === null) ? true : (tiltSaved === 'true');
                 ENABLE_TILT.checked = tiltOn;
+                const wigSaved = localStorage.getItem(LS_KEY_WIGGLE);
+                const wigOn = (wigSaved === null) ? true : (wigSaved === 'true');
+                var ENABLE_WIGGLE = document.getElementById('enable-wiggle');
+                if (ENABLE_WIGGLE) ENABLE_WIGGLE.checked = wigOn;
+                var INTENSITY = document.getElementById('enable-wiggle-intensity');
+                const savedIntensity = localStorage.getItem(LS_KEY_WIGGLE_INTENSITY) || 'medium';
+                if (INTENSITY) INTENSITY.value = savedIntensity;
                 BACKDROP.style.display = 'flex';
                 BACKDROP.setAttribute('aria-hidden','false');
                 // focus the input for convenience
@@ -848,6 +903,23 @@
                 const tiltVal = !!ENABLE_TILT.checked;
                 localStorage.setItem(LS_KEY_TILT, tiltVal ? 'true' : 'false');
                 if (tiltVal) document.body.classList.remove('tilt-disabled'); else document.body.classList.add('tilt-disabled');
+
+                // persist wiggle preference
+                var ENABLE_WIGGLE_SAVE = document.getElementById('enable-wiggle');
+                var wigVal = ENABLE_WIGGLE_SAVE ? !!ENABLE_WIGGLE_SAVE.checked : true;
+                localStorage.setItem(LS_KEY_WIGGLE, wigVal ? 'true' : 'false');
+                if (wigVal) {
+                    document.body.classList.remove('wiggle-disabled');
+                    // start wiggle loops gently
+                    // save intensity selection too
+                    var INTENSITY_SAVE = document.getElementById('enable-wiggle-intensity');
+                    var intensityVal = INTENSITY_SAVE ? INTENSITY_SAVE.value : 'medium';
+                    localStorage.setItem(LS_KEY_WIGGLE_INTENSITY, intensityVal);
+                    // map intensity to multiplier
+                    var map = { low: 0.6, medium: 1.0, high: 1.6 };
+                    window._wiggleIntensity = map[intensityVal] || 1.0;
+                    if (window._cardControls && typeof window._cardControls.startAllWiggles === 'function') window._cardControls.startAllWiggles();
+                } else document.body.classList.add('wiggle-disabled');
 
                 // YouTube id is optional here; only save/apply if provided
                 const raw = (INPUT.value || '').trim();
@@ -875,6 +947,16 @@
                 ENABLE_TILT.checked = true;
                 localStorage.removeItem(LS_KEY_TILT);
                 document.body.classList.remove('tilt-disabled');
+                // reset wiggle to default (enabled)
+                var ENABLE_WIGGLE_RST = document.getElementById('enable-wiggle');
+                if (ENABLE_WIGGLE_RST) ENABLE_WIGGLE_RST.checked = true;
+                localStorage.removeItem(LS_KEY_WIGGLE);
+                document.body.classList.remove('wiggle-disabled');
+                // reset intensity to medium
+                localStorage.removeItem(LS_KEY_WIGGLE_INTENSITY);
+                var INTENSITY_RST = document.getElementById('enable-wiggle-intensity');
+                if (INTENSITY_RST) INTENSITY_RST.value = 'medium';
+                window._wiggleIntensity = 1.0;
             });
 
             // on load, apply saved id and show-seconds preference if present
@@ -887,6 +969,18 @@
             const tiltSaved = localStorage.getItem(LS_KEY_TILT);
             const tiltOn = (tiltSaved === null) ? true : (tiltSaved === 'true');
             if (!tiltOn) document.body.classList.add('tilt-disabled');
+            // apply wiggle preference
+            const wigSaved = localStorage.getItem(LS_KEY_WIGGLE);
+            const wigOn = (wigSaved === null) ? true : (wigSaved === 'true');
+            if (!wigOn) document.body.classList.add('wiggle-disabled');
+            else {
+                // start wiggle loops after a short defer so widgets exist
+                // load intensity and map to multiplier
+                const savedIntensity = localStorage.getItem(LS_KEY_WIGGLE_INTENSITY) || 'medium';
+                var map = { low: 0.6, medium: 1.0, high: 1.6 };
+                window._wiggleIntensity = map[savedIntensity] || 1.0;
+                setTimeout(function(){ if (window._cardControls && typeof window._cardControls.startAllWiggles === 'function') window._cardControls.startAllWiggles(); }, 80);
+            }
         })();
     </script>
     <script>
