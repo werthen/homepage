@@ -61,9 +61,9 @@
         this.frameTimer = 0;
         if (typeof durationMs === 'number') this.stateTimer = durationMs;
         else {
-            if (newState === 'rest') this.stateTimer = 800 + Math.random() * 2000;
-            else if (newState === 'walk') this.stateTimer = 600 + Math.random() * 2000;
-            else if (newState === 'sleep') this.stateTimer = 3000 + Math.random() * 5000;
+            if (newState === 'rest') this.stateTimer = 1000 + Math.random() * 2000;
+            else if (newState === 'walk') this.stateTimer = 1000 + Math.random() * 4000;
+            else if (newState === 'sleep') this.stateTimer = 10000 + Math.random() * 10000;
             else this.stateTimer = 1000 + Math.random() * 2000;
         }
     };
