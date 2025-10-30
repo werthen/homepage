@@ -50,13 +50,17 @@
             padding: 20px 20px 18px 20px;
             box-shadow: 0 6px 18px rgba(33,40,33,0.06);
             border: 1px solid rgba(32,42,32,0.06);
-            transition: transform 0.12s ease, box-shadow 0.12s ease;
+            /* CSS variables drive the 3D tilt transform: --rx/--ry in deg, --tz in px, --scale */
+            --rx: 0deg; --ry: 0deg; --tz: 0px; --scale: 1;
+            transform: perspective(800px) translateZ(var(--tz)) rotateX(var(--rx)) rotateY(var(--ry)) scale(var(--scale));
+            transition: transform 220ms cubic-bezier(.2,.9,.2,1), box-shadow 220ms cubic-bezier(.2,.9,.2,1);
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
-        .container:hover .widget { transform: scale(0.996); filter: none; }
-        .container:hover .widget:hover { transform: scale(1.01); box-shadow: 0 12px 30px rgba(34,45,34,0.08); }
+    /* Adjust scale via CSS variable so 3D tilt (which uses transform) is not overwritten */
+    .container:hover .widget { --scale: 0.996; filter: none; }
+    .container:hover .widget:hover { --scale: 1.01; box-shadow: 0 12px 30px rgba(34,45,34,0.08); }
         .clock {
             grid-column: 1 / 2;
             grid-row: 1 / 2;
@@ -303,18 +307,21 @@
             -webkit-backdrop-filter: blur(6px) saturate(0.98);
             backdrop-filter: blur(6px) saturate(0.98);
             opacity: 0;
-            pointer-events: none;
+            pointer-events: none; /* overlay never captures pointer events */
             transition: opacity 220ms ease;
             z-index: 1000;
         }
         /* when active, show the overlay (it intercepts pointer events so blurred content isn't interactive) */
         body.tile-focused .page-blur-root .blur-overlay { opacity: 1; pointer-events: auto; }
+        /* Make the container non-interactive while blur is active; allow the active widget to remain interactive */
+        body.tile-focused .page-blur-root .container { pointer-events: none; }
         /* Exempt the active widget by placing it above the overlay */
         body.tile-focused .page-blur-root .widget.is-active {
             position: relative;
             z-index: 1101; /* above overlay */
             transform: scale(1.012);
             box-shadow: 0 18px 40px rgba(10,12,8,0.10);
+            pointer-events: auto !important;
         }
     </style>
 </head>
@@ -333,6 +340,9 @@
             </div>
             <div class="settings-row">
                 <label for="show-seconds"><input type="checkbox" id="show-seconds"> Show seconds in clock</label>
+            </div>
+            <div class="settings-row">
+                <label for="enable-tilt"><input type="checkbox" id="enable-tilt"> Enable 3D tilt on cards</label>
             </div>
             <div class="settings-actions">
                 <button class="btn-ghost" id="settings-cancel">Cancel</button>
@@ -399,13 +409,74 @@
             }
 
             widgets.forEach(function(w){
-                // pointer events (mouse/touch)
-                w.addEventListener('pointerenter', function(){ setActive(w); });
-                w.addEventListener('pointerleave', function(){ clearActive(); });
-                // keyboard focus accessibility
+                // per-widget tilt state
+                w._tilt = {
+                    target: { rx: 0, ry: 0, tz: 0, scale: 1 },
+                    current: { rx: 0, ry: 0, tz: 0, scale: 1 },
+                    raf: null
+                };
+
+                function lerp(a, b, t) { return a + (b - a) * t; }
+
+                function applyTransform(c) {
+                    // apply inline transform using numeric units
+                    var transform = 'perspective(800px) translateZ(' + c.tz.toFixed(2) + 'px) rotateX(' + c.rx.toFixed(2) + 'deg) rotateY(' + c.ry.toFixed(2) + 'deg) scale(' + c.scale.toFixed(3) + ')';
+                    w.style.transform = transform;
+                }
+
+                function tick() {
+                    var t = 0.16; // smoothing
+                    var cur = w._tilt.current;
+                    var tar = w._tilt.target;
+                    cur.rx = lerp(cur.rx, tar.rx, t);
+                    cur.ry = lerp(cur.ry, tar.ry, t);
+                    cur.tz = lerp(cur.tz, tar.tz, t);
+                    cur.scale = lerp(cur.scale, tar.scale, t);
+                    applyTransform(cur);
+                    // stop RAF if near target and not active
+                    var near = Math.abs(cur.rx - tar.rx) < 0.05 && Math.abs(cur.ry - tar.ry) < 0.05 && Math.abs(cur.tz - tar.tz) < 0.5 && Math.abs(cur.scale - tar.scale) < 0.005;
+                    if (near && !w.classList.contains('is-active')) {
+                        w._tilt.raf = null;
+                        // final reset
+                        w.style.transform = '';
+                        return;
+                    }
+                    w._tilt.raf = requestAnimationFrame(tick);
+                }
+
+                function startLoop() { if (!w._tilt.raf) w._tilt.raf = requestAnimationFrame(tick); }
+
+                // pointer handlers
+                w.addEventListener('pointerenter', function(){
+                    setActive(w);
+                    if (document.body.classList.contains('tilt-disabled')) return;
+                    startLoop();
+                });
+                w.addEventListener('pointerleave', function(){
+                    w._tilt.target = { rx: 0, ry: 0, tz: 0, scale: 1 };
+                    clearActive();
+                });
+                w.addEventListener('pointermove', function(e){
+                    if (!w.classList.contains('is-active')) return;
+                    if (document.body.classList.contains('tilt-disabled')) return;
+                    var rect = w.getBoundingClientRect();
+                    var px = (e.clientX - rect.left) / rect.width;
+                    var py = (e.clientY - rect.top) / rect.height;
+                    var dx = (px - 0.5) * 2;
+                    var dy = (py - 0.5) * 2;
+                    var maxTilt = 12;
+                    var rx = -dy * maxTilt;
+                    var ry = dx * maxTilt;
+                    var tz = Math.max(6, Math.min(18, (1 - (Math.abs(dx)+Math.abs(dy))/2) * 18));
+                    w._tilt.target.rx = rx; w._tilt.target.ry = ry; w._tilt.target.tz = tz; w._tilt.target.scale = 1.02;
+                    startLoop();
+                });
+
+                // keyboard accessibility
                 if (!w.hasAttribute('tabindex')) w.setAttribute('tabindex', '0');
-                w.addEventListener('focus', function(){ setActive(w); });
-                w.addEventListener('blur', function(){ clearActive(); });
+                w.addEventListener('focus', function(){ setActive(w); if (!document.body.classList.contains('tilt-disabled')) startLoop(); });
+                w.addEventListener('blur', function(){ w._tilt.target = { rx:0, ry:0, tz:0, scale:1 }; clearActive(); });
+                w.addEventListener('pointercancel', function(){ w._tilt.target = { rx:0, ry:0, tz:0, scale:1 }; clearActive(); });
             });
 
             // Also remove the class if the user clicks outside any widget (safety)
@@ -716,10 +787,12 @@
             const RESET = document.getElementById('settings-reset');
             const INPUT = document.getElementById('youtube-url');
             const SHOW_SECONDS = document.getElementById('show-seconds');
+            const ENABLE_TILT = document.getElementById('enable-tilt');
             const IFRAME = document.getElementById('youtube-iframe');
             const CLOCK = document.getElementById('clock');
             const LS_KEY = 'preferred_youtube_id';
             const LS_KEY_SHOW = 'show_seconds';
+            const LS_KEY_TILT = 'ui_enable_tilt';
 
             function parseYouTubeId(input) {
                 if (!input) return null;
@@ -748,6 +821,9 @@
                 // default: show seconds (true) when no preference set
                 const show = (savedShow === null) ? true : (savedShow === 'true');
                 SHOW_SECONDS.checked = show;
+                const tiltSaved = localStorage.getItem(LS_KEY_TILT);
+                const tiltOn = (tiltSaved === null) ? true : (tiltSaved === 'true');
+                ENABLE_TILT.checked = tiltOn;
                 BACKDROP.style.display = 'flex';
                 BACKDROP.setAttribute('aria-hidden','false');
                 // focus the input for convenience
@@ -768,6 +844,10 @@
                 const showVal = !!SHOW_SECONDS.checked;
                 localStorage.setItem(LS_KEY_SHOW, showVal ? 'true' : 'false');
                 applyShowSeconds(showVal);
+                // persist tilt preference
+                const tiltVal = !!ENABLE_TILT.checked;
+                localStorage.setItem(LS_KEY_TILT, tiltVal ? 'true' : 'false');
+                if (tiltVal) document.body.classList.remove('tilt-disabled'); else document.body.classList.add('tilt-disabled');
 
                 // YouTube id is optional here; only save/apply if provided
                 const raw = (INPUT.value || '').trim();
@@ -791,6 +871,10 @@
                 // reset seconds to default (show)
                 SHOW_SECONDS.checked = true;
                 applyShowSeconds(true);
+                // reset tilt to default (enabled)
+                ENABLE_TILT.checked = true;
+                localStorage.removeItem(LS_KEY_TILT);
+                document.body.classList.remove('tilt-disabled');
             });
 
             // on load, apply saved id and show-seconds preference if present
@@ -799,6 +883,10 @@
             const savedShow = localStorage.getItem(LS_KEY_SHOW);
             const show = (savedShow === null) ? true : (savedShow === 'true');
             applyShowSeconds(show);
+            // apply tilt preference
+            const tiltSaved = localStorage.getItem(LS_KEY_TILT);
+            const tiltOn = (tiltSaved === null) ? true : (tiltSaved === 'true');
+            if (!tiltOn) document.body.classList.add('tilt-disabled');
         })();
     </script>
     <script>
