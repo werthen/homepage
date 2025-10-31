@@ -20,6 +20,10 @@
     var walkers = [];
     var FRAME_DURATION = 120;
     var lastTime = 0;
+    // Performance knobs
+    var lowPower = !!window._lowPower || (navigator.connection && navigator.connection.saveData) || (navigator.deviceMemory && navigator.deviceMemory < 2);
+    var MAX_SPRITE_FPS = lowPower ? 20 : 60; // cap sprite loop FPS
+    var SPRITE_FRAME_PERIOD = 1000 / MAX_SPRITE_FPS;
 
     // Extensible states registry
     var STATES = {
@@ -140,7 +144,8 @@
     function resizeCanvas() {
         var rect = canvas.getBoundingClientRect();
         cssWidth = rect.width; cssHeight = rect.height;
-        var ratio = window.devicePixelRatio || 1;
+        // clamp devicePixelRatio when in low power to avoid huge canvases
+        var ratio = Math.min(window.devicePixelRatio || 1, lowPower ? 1 : 1.5);
         canvas.width = Math.max(1, Math.floor(cssWidth * ratio));
         canvas.height = Math.max(1, Math.floor(cssHeight * ratio));
         ctx.setTransform(ratio,0,0,ratio,0,0);
@@ -157,20 +162,24 @@
         canvas.style.height = Math.min(160, frameH + 20) + 'px';
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
+        // create a smaller number of walkers on low-power devices
         if (walkers.length === 0) {
             addWalker({ x: 40, scale: 0.6, offsetY: 0 });
-            addWalker({ x: 220, scale: 0.6, offsetY: 0 });
+            if (!lowPower) addWalker({ x: 220, scale: 0.6, offsetY: 0 });
         }
         lastTime = performance.now();
         requestAnimationFrame(loop);
     };
 
     function loop(now) {
-        var dt = Math.min(50, now - lastTime);
-        lastTime = now;
-        update(dt);
-        render();
-        requestAnimationFrame(loop);
+        var dt = now - lastTime;
+        if (dt >= SPRITE_FRAME_PERIOD) {
+            var step = Math.min(200, dt);
+            lastTime = now;
+            update(step);
+            render();
+        }
+        if (!document.hidden) requestAnimationFrame(loop);
     }
 
     function update(dt) { walkers.forEach(function(w){ w.update(dt); }); }
