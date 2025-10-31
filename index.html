@@ -21,6 +21,26 @@
             --grain-opacity: 0.55;
             --sheen: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0));
         }
+
+        /* Dark mode overrides when .dark-mode is present on body */
+        body.dark-mode {
+            /* Warm, botanical dark palette */
+            --bg: #09100c; /* near-black with green/wood undertone */
+            --paper: #0f1913; /* slightly lighter card surface */
+            --accent: #6fb06a; /* muted sage for accents */
+            --muted: #9bb29a; /* lighter muted green for secondary text */
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            --card-border: rgba(255,255,255,0.03);
+            color: #e6f2e6; /* soft off-white */
+        }
+
+        /* Smooth transitions for theme changes */
+        body, .widget, .container, .youtube-wrapper {
+            transition: background 280ms ease, color 280ms ease, box-shadow 280ms ease, border-color 280ms ease;
+        }
+
+        /* Dark mode: soften youtube wrapper background so iframe edges don't feel harsh */
+        body.dark-mode .youtube-wrapper { background: linear-gradient(180deg, rgba(18,28,20,0.6), rgba(12,18,14,0.6)); }
         /* include padding in element sizing to avoid accidental overflow */
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -365,6 +385,14 @@
                     <option value="low">Low</option>
                     <option value="medium" selected>Medium</option>
                     <option value="high">High</option>
+                </select>
+            </div>
+            <div class="settings-row">
+                <label for="theme-mode">Theme</label>
+                <select id="theme-mode">
+                    <option value="system">System (follow OS)</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
                 </select>
             </div>
             <div class="settings-actions">
@@ -853,6 +881,25 @@
             const LS_KEY_TILT = 'ui_enable_tilt';
             const LS_KEY_WIGGLE = 'ui_enable_wiggle';
             const LS_KEY_WIGGLE_INTENSITY = 'ui_wiggle_intensity';
+            const LS_KEY_THEME = 'ui_theme_mode';
+            var mediaPref = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+
+            function applyTheme(mode) {
+                // mode: 'system'|'light'|'dark'
+                if (mode === 'system') {
+                    var isDark = mediaPref ? mediaPref.matches : false;
+                    if (isDark) document.body.classList.add('dark-mode'); else document.body.classList.remove('dark-mode');
+                } else if (mode === 'dark') {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            }
+
+            function onSystemPrefChange(e) {
+                var chosen = localStorage.getItem(LS_KEY_THEME) || 'system';
+                if (chosen === 'system') applyTheme('system');
+            }
 
             function parseYouTubeId(input) {
                 if (!input) return null;
@@ -933,6 +980,12 @@
                     if (window._cardControls && typeof window._cardControls.startAllWiggles === 'function') window._cardControls.startAllWiggles();
                 } else document.body.classList.add('wiggle-disabled');
 
+                // persist theme choice
+                var THEME = document.getElementById('theme-mode');
+                var themeVal = THEME ? THEME.value : 'system';
+                localStorage.setItem(LS_KEY_THEME, themeVal);
+                applyTheme(themeVal);
+
                 // YouTube id is optional here; only save/apply if provided
                 const raw = (INPUT.value || '').trim();
                 if (raw === '') {
@@ -969,6 +1022,11 @@
                 var INTENSITY_RST = document.getElementById('enable-wiggle-intensity');
                 if (INTENSITY_RST) INTENSITY_RST.value = 'medium';
                 window._wiggleIntensity = 1.0;
+                // reset theme to system
+                localStorage.removeItem(LS_KEY_THEME);
+                var THEME_RST = document.getElementById('theme-mode');
+                if (THEME_RST) THEME_RST.value = 'system';
+                applyTheme('system');
             });
 
             // on load, apply saved id and show-seconds preference if present
@@ -993,6 +1051,14 @@
                 window._wiggleIntensity = map[savedIntensity] || 1.0;
                 setTimeout(function(){ if (window._cardControls && typeof window._cardControls.startAllWiggles === 'function') window._cardControls.startAllWiggles(); }, 80);
             }
+            // apply theme preference
+            const themeSaved = localStorage.getItem(LS_KEY_THEME) || 'system';
+            var themeSel = document.getElementById('theme-mode');
+            if (themeSel) themeSel.value = themeSaved;
+            applyTheme(themeSaved);
+            // listen to system changes if available
+            if (mediaPref && mediaPref.addEventListener) mediaPref.addEventListener('change', onSystemPrefChange);
+            else if (mediaPref && mediaPref.addListener) mediaPref.addListener(onSystemPrefChange);
         })();
     </script>
     <script>
