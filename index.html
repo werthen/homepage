@@ -1,1187 +1,1755 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-    <link rel="manifest" href="site.webmanifest">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,700&family=Source+Sans+3:wght@300;400;600&family=Roboto+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <head>
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+    <link rel="manifest" href="site.webmanifest" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,700&family=Source+Sans+3:wght@300;400;600&family=Roboto+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
-        /* Theme: Warm Paper & Botanicals variables */
-        :root{
-            --bg: #f7f5ef;
-            --paper: #fffdf8;
-            --accent: #2a6b2a;
-            --muted: #7b8b76;
-            --card-shadow: 0 12px 34px rgba(20,30,20,0.06);
-            --card-border: rgba(32,42,32,0.06);
-            --grain-opacity: 0.55;
-            --sheen: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0));
-        }
+      /* Theme: Warm Paper & Botanicals variables */
+      :root {
+        --bg: #f7f5ef;
+        --paper: #fffdf8;
+        --accent: #2a6b2a;
+        --muted: #7b8b76;
+        --card-shadow: 0 12px 34px rgba(20, 30, 20, 0.06);
+        --card-border: rgba(32, 42, 32, 0.06);
+        --grain-opacity: 0.55;
+        --sheen: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.28),
+          rgba(255, 255, 255, 0)
+        );
+      }
 
-        /* Dark mode overrides when .dark-mode is present on body */
-        body.dark-mode {
-            /* Warm, botanical dark palette */
-            --bg: #09100c; /* near-black with green/wood undertone */
-            --paper: #0f1913; /* slightly lighter card surface */
-            --accent: #6fb06a; /* muted sage for accents */
-            --muted: #9bb29a; /* lighter muted green for secondary text */
-            --card-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            --card-border: rgba(255,255,255,0.03);
-            color: #e6f2e6; /* soft off-white */
-        }
+      /* Dark mode overrides when .dark-mode is present on body */
+      body.dark-mode {
+        /* Warm, botanical dark palette */
+        --bg: #09100c; /* near-black with green/wood undertone */
+        --paper: #0f1913; /* slightly lighter card surface */
+        --accent: #6fb06a; /* muted sage for accents */
+        --muted: #9bb29a; /* lighter muted green for secondary text */
+        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        --card-border: rgba(255, 255, 255, 0.03);
+        color: #e6f2e6; /* soft off-white */
+      }
 
-        /* Smooth transitions for theme changes */
-        body, .widget, .container, .youtube-wrapper {
-            transition: background 280ms ease, color 280ms ease, box-shadow 280ms ease, border-color 280ms ease;
-        }
+      /* Smooth transitions for theme changes */
+      body,
+      .widget,
+      .container,
+      .youtube-wrapper {
+        transition: background 280ms ease, color 280ms ease,
+          box-shadow 280ms ease, border-color 280ms ease;
+      }
 
-        /* Dark mode: soften youtube wrapper background so iframe edges don't feel harsh */
-        body.dark-mode .youtube-wrapper { background: linear-gradient(180deg, rgba(18,28,20,0.6), rgba(12,18,14,0.6)); }
-        /* include padding in element sizing to avoid accidental overflow */
-        *, *::before, *::after { box-sizing: border-box; }
-        body {
-            font-family: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-            margin: 0;
-            padding: 28px;
-            background: linear-gradient(180deg, var(--bg) 0%, #f1efe6 100%);
-            color: #1f2d1f;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
+      /* Dark mode: soften youtube wrapper background so iframe edges don't feel harsh */
+      body.dark-mode .youtube-wrapper {
+        background: linear-gradient(
+          180deg,
+          rgba(18, 28, 20, 0.6),
+          rgba(12, 18, 14, 0.6)
+        );
+      }
+      /* include padding in element sizing to avoid accidental overflow */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Source Sans 3", system-ui, -apple-system, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial;
+        margin: 0;
+        padding: 28px;
+        background: linear-gradient(180deg, var(--bg) 0%, #f1efe6 100%);
+        color: #1f2d1f;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .container {
+        max-width: 1200px;
+        width: 100%;
+        display: grid;
+        /* responsive: fit as many columns as will at a comfortable minimum width */
+        grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+        grid-auto-rows: auto;
+        gap: 26px;
+        padding: 12px;
+        position: relative;
+      }
+      /* subtle paper grain overlay */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image: radial-gradient(
+          rgba(0, 0, 0, 0.015) 0.5px,
+          transparent 0.6px
+        );
+        background-size: 6px 6px;
+        opacity: 0.55;
+        mix-blend-mode: multiply;
+      }
+      .widget {
+        border-radius: 12px;
+        padding: 28px 26px 24px 26px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--card-border);
+        /* CSS variables drive the 3D tilt transform: --rx/--ry in deg, --tz in px, --scale */
+        --rx: 0deg;
+        --ry: 0deg;
+        --tz: 0px;
+        --scale: 1;
+        background: var(--paper);
+        transform: perspective(800px) translateZ(var(--tz)) rotateX(var(--rx))
+          rotateY(var(--ry)) scale(var(--scale));
+        transition: transform 220ms cubic-bezier(0.2, 0.9, 0.2, 1),
+          box-shadow 220ms cubic-bezier(0.2, 0.9, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      /* Adjust scale via CSS variable so 3D tilt (which uses transform) is not overwritten */
+      .container:hover .widget {
+        --scale: 0.996;
+        filter: none;
+      }
+      .container:hover .widget:hover {
+        --scale: 1.01;
+        box-shadow: 0 12px 30px rgba(34, 45, 34, 0.08);
+      }
+      .clock {
+        grid-column: 1 / 2;
+        grid-row: 1 / 2;
+        text-align: center;
+      }
+      .pomodoro {
+        grid-column: 2 / 3;
+        grid-row: 1 / 2;
+        text-align: center;
+      }
+      .pomodoro .pomodoro-controls {
+        margin-top: 10px;
+      }
+      .pomodoro .icon-btn {
+        background: linear-gradient(180deg, #eef7ec, #e6f1e1);
+        color: #1f3b1f;
+        border: 1px solid rgba(30, 50, 30, 0.08);
+        box-shadow: 0 2px 6px rgba(28, 38, 28, 0.04);
+      }
+      .pomodoro .icon-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 14px rgba(28, 38, 28, 0.06);
+      }
+      .pomodoro .icon-btn i {
+        color: #1f3b1f;
+      }
+      .pomodoro-timer.editable-duration {
+        background: transparent;
+        color: #16321a;
+        border-bottom: 1px dashed rgba(22, 50, 22, 0.08);
+        padding-bottom: 6px;
+        position: relative;
+        display: inline-block;
+      }
+      .pomodoro-timer.editable-duration:focus {
+        outline: none;
+        border-bottom: 1px dotted rgba(22, 50, 22, 0.12);
+      }
+      .weather {
+        grid-column: 1 / 2;
+        grid-row: 2 / 3;
+      }
+      .youtube {
+        grid-column: 2 / 3;
+        grid-row: 2 / 3;
+        padding: 0;
+      }
+      .clock-display {
+        font-family: "Roboto Mono", monospace;
+        font-size: 4.6rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        color: #16321a;
+      }
+      .digit {
+        position: relative;
+        display: inline-block;
+        width: 0.9ch;
+        height: 1.05em;
+        overflow: hidden;
+        text-align: center;
+        line-height: 1.05em;
+      }
+      .anim-digit {
+        display: block;
+        width: 100%;
+        transition: transform 110ms cubic-bezier(0.2, 0.9, 0.2, 1);
+        will-change: transform;
+      }
+      .colon {
+        display: inline-block;
+        line-height: 1;
+      }
+      .date-display {
+        font-family: "Merriweather", serif;
+        font-size: 1.05rem;
+        opacity: 0.85;
+        color: #2b3a2b;
+      }
+      /* hide seconds when the clock has .no-seconds */
+      .clock-display.no-seconds #s1,
+      .clock-display.no-seconds #s2,
+      .clock-display.no-seconds #colon2 {
+        display: none;
+      }
+      .pomodoro-timer {
+        font-family: "Merriweather", serif;
+        font-size: 2.4rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: #183218;
+      }
+      .pomodoro-controls button {
+        padding: 6px;
+        margin: 6px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: transform 0.12s ease, box-shadow 0.12s ease;
+      }
+      .pomodoro-controls {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .pomodoro-adjust label {
+        font-size: 0.9em;
+        margin-right: 8px;
+        opacity: 0.95;
+      }
+      .editable-duration {
+        display: inline-block;
+        min-width: 46px;
+        padding: 6px 8px;
+        margin-left: 6px;
+        border-radius: 4px;
+        background: transparent;
+        color: #16321a;
+        text-align: center;
+        outline: none;
+        cursor: text;
+        user-select: text;
+        caret-color: #16321a;
+        font-family: "Roboto Mono", monospace;
+        border-bottom: 1px dotted rgba(22, 50, 22, 0.06);
+      }
+      .editable-duration:focus {
+        box-shadow: none;
+      }
+      .editable-duration.disabled {
+        opacity: 0.6;
+        cursor: default;
+      }
+      .icon-btn {
+        background: rgba(255, 255, 255, 0.08);
+        border: none;
+        color: white;
+        padding: 10px;
+        border-radius: 12px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+      }
+      .icon-btn svg {
+        width: 20px;
+        height: 20px;
+        fill: white;
+      }
+      .weather-info {
+        text-align: center;
+      }
+      .weather-temp {
+        font-size: 5rem;
+        font-weight: 700;
+        color: #18421a;
+      }
+      .weather-desc {
+        font-size: 2rem;
+        opacity: 0.85;
+        color: #304030;
+      }
+      .youtube-wrapper {
+        position: relative;
+        padding-top: 56.25%;
+        overflow: hidden;
+        border-radius: 10px;
+        background: linear-gradient(
+          180deg,
+          rgba(230, 240, 230, 0.6),
+          rgba(245, 248, 245, 0.6)
+        );
+        border: 1px solid rgba(32, 42, 32, 0.04);
+      }
+      .youtube-wrapper iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        border-radius: 10px;
+      }
+      .greeting {
+        position: absolute;
+        top: 22px;
+        left: 24px;
+        font-family: "Merriweather", serif;
+        font-size: 1.25rem;
+        font-weight: 400;
+        color: #2a3a2a;
+        opacity: 0.95;
+      }
+      .greeting [contenteditable] {
+        padding: 0 3px;
+        border-radius: 4px;
+        min-width: 40px;
+        display: inline-block;
+      }
+      .greeting [contenteditable]:focus {
+        outline: 2px solid rgba(34, 88, 34, 0.12);
+        background: rgba(240, 245, 240, 0.6);
+      }
+      /* settings cog */
+      .settings-cog {
+        position: absolute;
+        top: 18px;
+        right: 20px;
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(180deg, #f6faf4, #eef7ec);
+        border: 1px solid rgba(30, 45, 30, 0.06);
+        cursor: pointer;
+        box-shadow: 0 6px 12px rgba(8, 12, 8, 0.04);
+      }
+      .settings-cog i {
+        color: #16321a;
+        font-size: 18px;
+      }
+
+      /* modal */
+      .settings-modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 12, 8, 0.35);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1200;
+      }
+      .settings-modal {
+        background: #fffef8;
+        border-radius: 10px;
+        padding: 18px;
+        width: 420px;
+        max-width: calc(100% - 40px);
+        box-shadow: 0 12px 40px rgba(10, 12, 8, 0.16);
+        border: 1px solid rgba(32, 42, 32, 0.06);
+      }
+      .settings-modal h3 {
+        margin: 0 0 8px 0;
+        font-family: "Merriweather", serif;
+      }
+      .settings-row {
+        margin-bottom: 12px;
+      }
+      .settings-row label {
+        display: block;
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+        color: #2b3a2b;
+      }
+      .settings-row input[type="text"] {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: 1px solid rgba(30, 40, 30, 0.07);
+      }
+      .settings-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+      .settings-actions button {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+      }
+      .btn-ghost {
+        background: transparent;
+        border: 1px solid rgba(30, 40, 30, 0.06);
+      }
+      .btn-primary {
+        background: linear-gradient(180deg, #e6f1e1, #dff0d9);
+        border: 1px solid rgba(22, 50, 22, 0.08);
+      }
+      @media (max-width: 768px) {
         .container {
-            max-width: 1100px;
-            width: 100%;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: auto auto auto;
-            gap: 22px;
-            padding: 8px;
-            position: relative;
+          /* force a single column layout on small screens */
+          grid-template-columns: 1fr !important;
+          grid-auto-rows: auto;
+          gap: 18px;
+          padding: 10px;
+          grid-auto-flow: row;
         }
-        /* subtle paper grain overlay */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            background-image: radial-gradient(rgba(0,0,0,0.015) 0.5px, transparent 0.6px);
-            background-size: 6px 6px;
-            opacity: 0.55;
-            mix-blend-mode: multiply;
+        .clock,
+        .pomodoro,
+        .weather,
+        .youtube {
+          grid-column: 1 / -1;
+          grid-row: auto;
         }
         .widget {
-            border-radius: 10px;
-            padding: 20px 20px 18px 20px;
-            box-shadow: var(--card-shadow);
-            border: 1px solid var(--card-border);
-            /* CSS variables drive the 3D tilt transform: --rx/--ry in deg, --tz in px, --scale */
-            --rx: 0deg; --ry: 0deg; --tz: 0px; --scale: 1;
-            background: var(--paper);
-            transform: perspective(800px) translateZ(var(--tz)) rotateX(var(--rx)) rotateY(var(--ry)) scale(var(--scale));
-            transition: transform 220ms cubic-bezier(.2,.9,.2,1), box-shadow 220ms cubic-bezier(.2,.9,.2,1);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-    /* Adjust scale via CSS variable so 3D tilt (which uses transform) is not overwritten */
-    .container:hover .widget { --scale: 0.996; filter: none; }
-    .container:hover .widget:hover { --scale: 1.01; box-shadow: 0 12px 30px rgba(34,45,34,0.08); }
-        .clock {
-            grid-column: 1 / 2;
-            grid-row: 1 / 2;
-            text-align: center;
-        }
-        .pomodoro {
-            grid-column: 2 / 3;
-            grid-row: 1 / 2;
-            text-align: center;
-        }
-        .pomodoro .pomodoro-controls { margin-top: 10px; }
-        .pomodoro .icon-btn {
-            background: linear-gradient(180deg, #eef7ec, #e6f1e1);
-            color: #1f3b1f;
-            border: 1px solid rgba(30,50,30,0.08);
-            box-shadow: 0 2px 6px rgba(28,38,28,0.04);
-        }
-        .pomodoro .icon-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(28,38,28,0.06); }
-        .pomodoro .icon-btn i { color: #1f3b1f; }
-        .pomodoro-timer.editable-duration {
-            background: transparent;
-            color: #16321a;
-            border-bottom: 1px dashed rgba(22,50,22,0.08);
-            padding-bottom: 6px;
-            position: relative;
-            display: inline-block;
-        }
-        .pomodoro-timer.editable-duration:focus { outline: none; border-bottom: 1px dotted rgba(22,50,22,0.12); }
-        .weather {
-            grid-column: 1 / 2;
-            grid-row: 2 / 3;
-        }
-        .youtube {
-            grid-column: 2 / 3;
-            grid-row: 2 / 3;
-            padding: 0;
+          padding: 18px;
+          border-radius: 10px;
+          display: block;
+          width: auto;
         }
         .clock-display {
-            font-family: 'Roboto Mono', monospace;
-            font-size: 3.6rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            color: #16321a;
+          font-size: 3.2rem;
         }
-        .digit {
-            position: relative;
-            display:inline-block;
-            width: 0.9ch;
-            height: 1.05em;
-            overflow: hidden;
-            text-align: center;
-            line-height: 1.05em;
+        .weather-temp {
+          font-size: 3.6rem;
         }
-        .anim-digit {
-            display: block;
-            width: 100%;
-            transition: transform 110ms cubic-bezier(.2,.9,.2,1);
-            will-change: transform;
-        }
-        .colon {
-            display: inline-block;
-            line-height: 1;
-        }
-        .date-display {
-            font-family: 'Merriweather', serif;
-            font-size: 1.05rem;
-            opacity: 0.85;
-            color: #2b3a2b;
-        }
-        /* hide seconds when the clock has .no-seconds */
-        .clock-display.no-seconds #s1,
-        .clock-display.no-seconds #s2,
-        .clock-display.no-seconds #colon2 { display: none; }
-        .pomodoro-timer {
-            font-family: 'Merriweather', serif;
-            font-size: 2.4rem;
-            font-weight: 700;
-            margin-bottom: 16px;
-            color: #183218;
-        }
-        .pomodoro-controls button {
-            padding: 6px;
-            margin: 6px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: transform 0.12s ease, box-shadow 0.12s ease;
-        }
-        .pomodoro-controls {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .pomodoro-adjust label {
-            font-size: 0.9em;
-            margin-right: 8px;
-            opacity: 0.95;
-        }
-        .editable-duration {
-            display: inline-block;
-            min-width: 46px;
-            padding: 6px 8px;
-            margin-left: 6px;
-            border-radius: 4px;
-            background: transparent;
-            color: #16321a;
-            text-align: center;
-            outline: none;
-            cursor: text;
-            user-select: text;
-            caret-color: #16321a;
-            font-family: 'Roboto Mono', monospace;
-            border-bottom: 1px dotted rgba(22,50,22,0.06);
-        }
-        .editable-duration:focus { box-shadow: none; }
-    .editable-duration.disabled { opacity: 0.6; cursor: default; }
-        .icon-btn {
-            background: rgba(255,255,255,0.08);
-            border: none;
-            color: white;
-            padding: 10px;
-            border-radius: 12px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 44px;
-            height: 44px;
-        }
-        .icon-btn svg {
-            width: 20px;
-            height: 20px;
-            fill: white;
-        }
-        .weather-info { text-align: center; }
-        .weather-temp { font-size: 4rem; font-weight: 700; color: #18421a; }
-        .weather-desc { font-size: 2rem; opacity: 0.85; color: #304030; }
-        .youtube-wrapper {
-            position: relative;
-            padding-top: 56.25%;
-            overflow: hidden;
-            border-radius: 10px;
-            background: linear-gradient(180deg, rgba(230,240,230,0.6), rgba(245,248,245,0.6));
-            border: 1px solid rgba(32,42,32,0.04);
-        }
-        .youtube-wrapper iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 0;
-            border-radius: 10px;
-        }
-        .greeting {
-            position: absolute;
-            top: 22px;
-            left: 24px;
-            font-family: 'Merriweather', serif;
-            font-size: 1.25rem;
-            font-weight: 400;
-            color: #2a3a2a;
-            opacity: 0.95;
-        }
-        .greeting [contenteditable] { padding: 0 3px; border-radius: 4px; min-width: 40px; display: inline-block; }
-        .greeting [contenteditable]:focus { outline: 2px solid rgba(34,88,34,0.12); background: rgba(240,245,240,0.6); }
-        /* settings cog */
-        .settings-cog {
-            position: absolute;
-            top: 18px;
-            right: 20px;
-            width: 38px;
-            height: 38px;
-            border-radius: 8px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(180deg,#f6faf4,#eef7ec);
-            border: 1px solid rgba(30,45,30,0.06);
-            cursor: pointer;
-            box-shadow: 0 6px 12px rgba(8,12,8,0.04);
-        }
-        .settings-cog i { color: #16321a; font-size: 18px; }
+      }
 
-        /* modal */
-        .settings-modal-backdrop { position: fixed; inset: 0; background: rgba(10,12,8,0.35); display: none; align-items: center; justify-content: center; z-index: 1200; }
-        .settings-modal { background: #fffef8; border-radius: 10px; padding: 18px; width: 420px; max-width: calc(100% - 40px); box-shadow: 0 12px 40px rgba(10,12,8,0.16); border: 1px solid rgba(32,42,32,0.06); }
-        .settings-modal h3 { margin: 0 0 8px 0; font-family: 'Merriweather', serif; }
-        .settings-row { margin-bottom: 12px; }
-        .settings-row label { display:block; font-size:0.9rem; margin-bottom:6px; color:#2b3a2b; }
-        .settings-row input[type="text"] { width:100%; padding:8px 10px; border-radius:6px; border:1px solid rgba(30,40,30,0.07); }
-        .settings-actions { display:flex; gap:8px; justify-content:flex-end; }
-        .settings-actions button { padding:8px 12px; border-radius:6px; border:none; cursor:pointer; }
-        .btn-ghost { background:transparent; border:1px solid rgba(30,40,30,0.06); }
-        .btn-primary { background:linear-gradient(180deg,#e6f1e1,#dff0d9); border:1px solid rgba(22,50,22,0.08); }
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto;
-            }
-            .clock, .pomodoro, .weather {
-                grid-column: 1 / -1;
-            }
+      /* Mobile: keep header and footer static and allow the tiles area to scroll */
+      @media (max-width: 768px) {
+        /* Mobile header/footer heights (used to position the scrollable middle area) */
+        :root {
+          --mobile-header-h: 64px;
+          --mobile-footer-h: 84px;
         }
-        /* quote text displayed at the bottom of the page content, aligned right */
-        .quote-rotator {
-            display: block;
-            /* margin: 18px 20px 48px auto; right-aligned with a 20px gap from the edge */
-            position: absolute;
-            bottom: 28px;
-            right: 28px;
-            max-height: 75px;
-            max-width: 360px;
-            padding: 0;
-            font-family: 'Merriweather', serif;
-            color: #16321a;
-            opacity: 0.98;
-            transition: transform 0.12s ease, opacity 0.12s ease;
-            background: transparent;
-            border: none;
-            box-shadow: none;
-            text-align: right; /* ensure author aligns neatly */
+
+        /* Create simple mobile header and footer wrappers to host fixed elements */
+        .mobile-header,
+        .mobile-footer {
+          display: none;
         }
-        .quote-rotator .quote { font-size: 0.95rem; line-height: 1.3; opacity: 0; transition: opacity 600ms ease, transform 600ms cubic-bezier(.2,.9,.2,1); transform: translateY(6px); background: transparent; padding: 0; margin: 0; }
-        .quote-rotator .quote.active { opacity: 1; transform: translateY(0); }
-        .quote-rotator .author { font-size: 0.82rem; margin-top: 6px; color: #2b3a2b; font-family: 'Source Sans 3', sans-serif; }
-        .quote-rotator:hover { transform: translateY(-2px); }
-        /* Hover-to-blur: when hovering a tile, blur everything except the hovered tile */
-        body.tile-focused::before {
-            /* increase overlay darkness slightly when a tile is focused to help readability */
-            background-color: rgba(255,255,255,0.0);
+        .mobile-header {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: var(--mobile-header-h);
+          z-index: 1600;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 8px 12px;
+          background: var(--paper);
+          box-shadow: 0 6px 18px rgba(8, 12, 8, 0.06);
         }
-        /* page blur implemented with an overlay using backdrop-filter so the active widget can sit above it */
-        .page-blur-root { position: relative; }
+        .mobile-footer {
+          position: fixed;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          height: var(--mobile-footer-h);
+          z-index: 1600;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 8px 12px;
+          background: var(--paper);
+          box-shadow: 0 -6px 18px rgba(8, 12, 8, 0.06);
+        }
+
+        /* show mobile header/footer and hide the desktop absolute elements */
+        .mobile-header,
+        .mobile-footer {
+          display: flex;
+        }
+        /* hide desktop-positioned duplicates so they don't overlap */
+        body > .greeting,
+        body > .settings-cog,
+        body > .quote-rotator {
+          display: none !important;
+        }
+        /* make the elements inside the mobile wrappers interactive */
+        .mobile-header .greeting,
+        .mobile-header .settings-cog,
+        .mobile-footer .quote-rotator {
+          pointer-events: auto;
+        }
+
+        /* Side padding retained on body, but the central area will be the scrollable region */
+        body {
+          padding: 0 8px;
+        }
+
+        /* Make the central page area fill remaining height and be scrollable between header/footer */
+        .page-blur-root {
+          position: fixed;
+          top: var(--mobile-header-h);
+          left: 0;
+          right: 0;
+          bottom: var(--mobile-footer-h);
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          z-index: 100;
+        }
         .page-blur-root .blur-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(255,255,255,0.02);
-            -webkit-backdrop-filter: blur(6px) saturate(0.98);
-            backdrop-filter: blur(6px) saturate(0.98);
-            opacity: 0;
-            pointer-events: none; /* overlay never captures pointer events */
-            transition: opacity 220ms ease;
-            z-index: 1000;
+          position: absolute;
         }
-        /* when active, show the overlay (it intercepts pointer events so blurred content isn't interactive) */
-        body.tile-focused .page-blur-root .blur-overlay { opacity: 1; pointer-events: auto; }
-        /* Make the container non-interactive while blur is active; allow the active widget to remain interactive */
-        body.tile-focused .page-blur-root .container { pointer-events: none; }
-        /* Exempt the active widget by placing it above the overlay */
-        body.tile-focused .page-blur-root .widget.is-active {
-            position: relative;
-            z-index: 1101; /* above overlay */
-            transform: scale(1.012);
-            box-shadow: 0 18px 40px rgba(10,12,8,0.10);
-            pointer-events: auto !important;
+        /* container sits centered inside the scroll area and has extra bottom padding so content isn't obscured by the fixed footer */
+        .page-blur-root .container {
+          padding: 16px;
+          box-sizing: border-box;
+          width: 100%;
+          margin: 0 auto;
+          padding-bottom: calc(var(--mobile-footer-h) + 24px);
         }
+      }
+      /* quote text displayed at the bottom of the page content, aligned right */
+      .quote-rotator {
+        display: block;
+        /* margin: 18px 20px 48px auto; right-aligned with a 20px gap from the edge */
+        position: absolute;
+        bottom: 28px;
+        right: 28px;
+        max-height: 75px;
+        max-width: 360px;
+        padding: 0;
+        font-family: "Merriweather", serif;
+        color: #16321a;
+        opacity: 0.98;
+        transition: transform 0.12s ease, opacity 0.12s ease;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        text-align: right; /* ensure author aligns neatly */
+      }
+      .quote-rotator .quote {
+        font-size: 0.95rem;
+        line-height: 1.3;
+        opacity: 0;
+        transition: opacity 600ms ease,
+          transform 600ms cubic-bezier(0.2, 0.9, 0.2, 1);
+        transform: translateY(6px);
+        background: transparent;
+        padding: 0;
+        margin: 0;
+      }
+      .quote-rotator .quote.active {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .quote-rotator .author {
+        font-size: 0.82rem;
+        margin-top: 6px;
+        color: #2b3a2b;
+        font-family: "Source Sans 3", sans-serif;
+      }
+      .quote-rotator:hover {
+        transform: translateY(-2px);
+      }
+      /* Hover-to-blur: when hovering a tile, blur everything except the hovered tile */
+      body.tile-focused::before {
+        /* increase overlay darkness slightly when a tile is focused to help readability */
+        background-color: rgba(255, 255, 255, 0);
+      }
+      /* page blur implemented with an overlay using backdrop-filter so the active widget can sit above it */
+      .page-blur-root {
+        position: relative;
+      }
+      .page-blur-root .blur-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.02);
+        -webkit-backdrop-filter: blur(6px) saturate(0.98);
+        backdrop-filter: blur(6px) saturate(0.98);
+        opacity: 0;
+        pointer-events: none; /* overlay never captures pointer events */
+        transition: opacity 220ms ease;
+        z-index: 1000;
+      }
+      /* when active, show the overlay (it intercepts pointer events so blurred content isn't interactive) */
+      body.tile-focused .page-blur-root .blur-overlay {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      /* Make the container non-interactive while blur is active; allow the active widget to remain interactive */
+      body.tile-focused .page-blur-root .container {
+        pointer-events: none;
+      }
+      /* Exempt the active widget by placing it above the overlay */
+      body.tile-focused .page-blur-root .widget.is-active {
+        position: relative;
+        z-index: 1101; /* above overlay */
+        transform: scale(1.012);
+        box-shadow: 0 18px 40px rgba(10, 12, 8, 0.1);
+        pointer-events: auto !important;
+      }
     </style>
-</head>
-<body>
-    <div class="greeting" id="greeting">Good morning, <span id="greeting-name" contenteditable="true" tabindex="0">Lorin</span></div>
-    <div class="settings-cog" id="settings-cog" title="Settings">
+  </head>
+  <body>
+    <!-- Mobile header wrapper (mirrors greeting + settings) -->
+    <div class="mobile-header" aria-hidden="true">
+      <div class="greeting" id="greeting">
+        Good morning,
+        <span id="greeting-name" contenteditable="true" tabindex="0"
+          >Lorin</span
+        >
+      </div>
+      <div class="settings-cog" id="settings-cog" title="Settings">
         <i class="fa-solid fa-cog"></i>
+      </div>
     </div>
 
-    <div class="settings-modal-backdrop" id="settings-backdrop" aria-hidden="true">
-        <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
-            <h3 id="settings-title">Settings</h3>
-            <div class="settings-row">
-                <label for="youtube-url">YouTube video URL or ID</label>
-                <input type="text" id="youtube-url" placeholder="https://www.youtube.com/watch?v=..."> 
-            </div>
-            <div class="settings-row">
-                <label for="show-seconds"><input type="checkbox" id="show-seconds"> Show seconds in clock</label>
-            </div>
-            <div class="settings-row">
-                <label for="enable-tilt"><input type="checkbox" id="enable-tilt"> Enable 3D tilt on cards</label>
-            </div>
-            <div class="settings-row">
-                <label for="enable-wiggle"><input type="checkbox" id="enable-wiggle"> Enable wiggle on cards (subtle)</label>
-            </div>
-            <div class="settings-row">
-                <label for="enable-wiggle-intensity">Wiggle intensity</label>
-                <select id="enable-wiggle-intensity">
-                    <option value="low">Low</option>
-                    <option value="medium" selected>Medium</option>
-                    <option value="high">High</option>
-                </select>
-            </div>
-            <div class="settings-row">
-                <label for="theme-mode">Theme</label>
-                <select id="theme-mode">
-                    <option value="system">System (follow OS)</option>
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                </select>
-            </div>
-            <div class="settings-actions">
-                <button class="btn-ghost" id="settings-cancel">Cancel</button>
-                <button class="btn-ghost" id="settings-reset">Reset to default</button>
-                <button class="btn-primary" id="settings-save">Save</button>
-            </div>
+    <div
+      class="settings-modal-backdrop"
+      id="settings-backdrop"
+      aria-hidden="true"
+    >
+      <div
+        class="settings-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-title"
+      >
+        <h3 id="settings-title">Settings</h3>
+        <div class="settings-row">
+          <label for="youtube-url">YouTube video URL or ID</label>
+          <input
+            type="text"
+            id="youtube-url"
+            placeholder="https://www.youtube.com/watch?v=..."
+          />
         </div>
+        <div class="settings-row">
+          <label for="show-seconds"
+            ><input type="checkbox" id="show-seconds" /> Show seconds in
+            clock</label
+          >
+        </div>
+        <div class="settings-row">
+          <label for="enable-tilt"
+            ><input type="checkbox" id="enable-tilt" /> Enable 3D tilt on
+            cards</label
+          >
+        </div>
+        <div class="settings-row">
+          <label for="enable-wiggle"
+            ><input type="checkbox" id="enable-wiggle" /> Enable wiggle on cards
+            (subtle)</label
+          >
+        </div>
+        <div class="settings-row">
+          <label for="enable-wiggle-intensity">Wiggle intensity</label>
+          <select id="enable-wiggle-intensity">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <label for="theme-mode">Theme</label>
+          <select id="theme-mode">
+            <option value="system">System (follow OS)</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+        <div class="settings-actions">
+          <button class="btn-ghost" id="settings-cancel">Cancel</button>
+          <button class="btn-ghost" id="settings-reset">
+            Reset to default
+          </button>
+          <button class="btn-primary" id="settings-save">Save</button>
+        </div>
+      </div>
     </div>
     <div class="page-blur-root">
-    <div class="blur-overlay" aria-hidden="true"></div>
-    <div class="container">
+      <div class="blur-overlay" aria-hidden="true"></div>
+      <div class="container">
         <div class="widget clock">
-            <div class="clock-display" id="clock">
-                <span class="digit" id="h1">0</span><span class="digit" id="h2">0</span><span class="colon" id="colon1">:</span><span class="digit" id="m1">0</span><span class="digit" id="m2">0</span><span class="colon" id="colon2">:</span><span class="digit" id="s1">0</span><span class="digit" id="s2">0</span>
-            </div>
-            <div class="date-display" id="date">Monday, October 28, 2025</div>
+          <div class="clock-display" id="clock">
+            <span class="digit" id="h1">0</span
+            ><span class="digit" id="h2">0</span
+            ><span class="colon" id="colon1">:</span
+            ><span class="digit" id="m1">0</span
+            ><span class="digit" id="m2">0</span
+            ><span class="colon" id="colon2">:</span
+            ><span class="digit" id="s1">0</span
+            ><span class="digit" id="s2">0</span>
+          </div>
+          <div class="date-display" id="date">Monday, October 28, 2025</div>
         </div>
         <div class="widget pomodoro">
-            <div class="pomodoro-timer editable-duration" id="timer" contenteditable="true" tabindex="0">25:00</div>
-            <div class="pomodoro-controls">
-                <button id="toggle" class="icon-btn" title="Start/Pause">
-                    <i id="toggle-icon" class="fa-solid fa-play"></i>
-                </button>
-                <button id="reset" class="icon-btn" title="Reset">
-                    <i class="fa-solid fa-rotate-right"></i>
-                </button>
-            </div>
-            <div id="status">Work Session</div>
+          <div
+            class="pomodoro-timer editable-duration"
+            id="timer"
+            contenteditable="true"
+            tabindex="0"
+          >
+            25:00
+          </div>
+          <div class="pomodoro-controls">
+            <button id="toggle" class="icon-btn" title="Start/Pause">
+              <i id="toggle-icon" class="fa-solid fa-play"></i>
+            </button>
+            <button id="reset" class="icon-btn" title="Reset">
+              <i class="fa-solid fa-rotate-right"></i>
+            </button>
+          </div>
+          <div id="status">Work Session</div>
         </div>
         <div class="widget weather">
-            <div class="weather-info" id="weather-info">
-                <div class="weather-temp">--°C</div>
-                <div class="weather-desc">Loading...</div>
-            </div>
+          <div class="weather-info" id="weather-info">
+            <div class="weather-temp">--°C</div>
+            <div class="weather-desc">Loading...</div>
+          </div>
         </div>
         <div class="widget youtube">
-            <div class="youtube-wrapper"><iframe id="youtube-iframe" data-default-id="KLPApSRku8Y" src="https://www.youtube.com/embed/KLPApSRku8Y?rel=0" allowfullscreen scrolling="no" allow="accelerometer *; clipboard-write *; encrypted-media *; gyroscope *; picture-in-picture *; web-share *;" referrerpolicy="strict-origin"></iframe></div>
+          <div class="youtube-wrapper">
+            <iframe
+              id="youtube-iframe"
+              data-default-id="KLPApSRku8Y"
+              src="https://www.youtube.com/embed/KLPApSRku8Y?rel=0"
+              allowfullscreen
+              scrolling="no"
+              allow="accelerometer *; clipboard-write *; encrypted-media *; gyroscope *; picture-in-picture *; web-share *;"
+              referrerpolicy="strict-origin"
+            ></iframe>
+          </div>
         </div>
+      </div>
+    </div>
+    <!-- Mobile footer wrapper (mirrors quote-rotator) -->
+    <div class="mobile-footer" aria-hidden="true">
+      <div class="quote-rotator" id="quote-rotator" aria-live="polite">
+        <div class="quote" id="quote-content">
+          <div class="text"></div>
+          <div class="author"></div>
         </div>
+      </div>
     </div>
-    <div class="quote-rotator" id="quote-rotator" aria-live="polite">
-        <div class="quote" id="quote-content"><div class="text"></div><div class="author"></div></div>
-    </div>
-
-    </div>
-
     <script>
-        // Hover/focus blur logic: when a widget is hovered or focused, blur the rest of the page
-        (function(){
-            var body = document.body;
-            var widgets = Array.prototype.slice.call(document.querySelectorAll('.widget'));
-            if (!widgets.length) return;
+      // Hover/focus blur logic: when a widget is hovered or focused, blur the rest of the page
+      (function () {
+        var body = document.body;
+        var widgets = Array.prototype.slice.call(
+          document.querySelectorAll(".widget")
+        );
+        if (!widgets.length) return;
 
-            function clearActive() {
-                body.classList.remove('tile-focused');
-                widgets.forEach(function(x){ x.classList.remove('is-active'); });
+        function clearActive() {
+          body.classList.remove("tile-focused");
+          widgets.forEach(function (x) {
+            x.classList.remove("is-active");
+          });
+        }
+
+        function setActive(w) {
+          if (!w) return clearActive();
+          body.classList.add("tile-focused");
+          widgets.forEach(function (x) {
+            x.classList.remove("is-active");
+          });
+          w.classList.add("is-active");
+        }
+
+        widgets.forEach(function (w) {
+          // per-widget tilt state
+          w._tilt = {
+            target: { rx: 0, ry: 0, tz: 0, scale: 1 },
+            current: { rx: 0, ry: 0, tz: 0, scale: 1 },
+            raf: null,
+          };
+
+          // per-widget wiggle state (autonomous subtle motion)
+          w._wiggle = {
+            phase: Math.random() * Math.PI * 2,
+            ampX: 0.5 + Math.random() * 0.9, // px horizontal
+            ampY: 0.6 + Math.random() * 1.0, // px vertical
+            speed: 0.45 + Math.random() * 0.6, // speed factor
+          };
+
+          // global intensity (1.0 default) applied multiplicatively to wiggle amps
+          window._wiggleIntensity = window._wiggleIntensity || 1.0;
+
+          function lerp(a, b, t) {
+            return a + (b - a) * t;
+          }
+
+          function applyTransform(c, wigX, wigY) {
+            // apply inline transform using numeric units; wigX/wigY are pixel offsets
+            wigX = wigX || 0;
+            wigY = wigY || 0;
+            var transform =
+              "perspective(800px) translate3d(" +
+              wigX.toFixed(2) +
+              "px," +
+              wigY.toFixed(2) +
+              "px," +
+              c.tz.toFixed(2) +
+              "px) rotateX(" +
+              c.rx.toFixed(2) +
+              "deg) rotateY(" +
+              c.ry.toFixed(2) +
+              "deg) scale(" +
+              c.scale.toFixed(3) +
+              ")";
+            w.style.transform = transform;
+          }
+
+          function tick() {
+            var t = 0.16; // smoothing
+            var cur = w._tilt.current;
+            var tar = w._tilt.target;
+            cur.rx = lerp(cur.rx, tar.rx, t);
+            cur.ry = lerp(cur.ry, tar.ry, t);
+            cur.tz = lerp(cur.tz, tar.tz, 0.12);
+            cur.scale = lerp(cur.scale, tar.scale, 0.08);
+
+            // compute wiggle offsets if enabled and user doesn't prefer reduced motion
+            var wiggleEnabled =
+              !document.body.classList.contains("wiggle-disabled") &&
+              !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            var wigX = 0,
+              wigY = 0;
+            if (wiggleEnabled) {
+              var s = w._wiggle;
+              var now = performance.now() / 1000;
+              var phase = s.phase + now * s.speed;
+              var inten =
+                typeof window._wiggleIntensity === "number"
+                  ? window._wiggleIntensity
+                  : 1.0;
+              // apply intensity multiplier
+              wigX = Math.sin(phase) * s.ampX * inten;
+              wigY = Math.cos(phase * 0.92) * s.ampY * inten;
             }
 
-            function setActive(w) {
-                if (!w) return clearActive();
-                body.classList.add('tile-focused');
-                widgets.forEach(function(x){ x.classList.remove('is-active'); });
-                w.classList.add('is-active');
+            applyTransform(cur, wigX, wigY);
+
+            // stop RAF only if we're near the tilt target and wiggle is disabled
+            var near =
+              Math.abs(cur.rx - tar.rx) < 0.05 &&
+              Math.abs(cur.ry - tar.ry) < 0.05 &&
+              Math.abs(cur.tz - tar.tz) < 0.5 &&
+              Math.abs(cur.scale - tar.scale) < 0.005;
+            if (near && !w.classList.contains("is-active") && !wiggleEnabled) {
+              w._tilt.raf = null;
+              // final reset
+              w.style.transform = "";
+              return;
             }
+            w._tilt.raf = requestAnimationFrame(tick);
+          }
 
-            widgets.forEach(function(w){
-                // per-widget tilt state
-                w._tilt = {
-                    target: { rx: 0, ry: 0, tz: 0, scale: 1 },
-                    current: { rx: 0, ry: 0, tz: 0, scale: 1 },
-                    raf: null
-                };
+          function startLoop() {
+            if (!w._tilt.raf) w._tilt.raf = requestAnimationFrame(tick);
+          }
+          // expose start helper so external callers (like settings) can start the widget's RAF loop
+          w._tilt.start = startLoop;
 
-                // per-widget wiggle state (autonomous subtle motion)
-                w._wiggle = {
-                    phase: Math.random() * Math.PI * 2,
-                    ampX: 0.5 + Math.random() * 0.9, // px horizontal
-                    ampY: 0.6 + Math.random() * 1.0, // px vertical
-                    speed: 0.45 + Math.random() * 0.6 // speed factor
-                };
+          // pointer handlers
+          w.addEventListener("pointerenter", function () {
+            setActive(w);
+            if (!document.body.classList.contains("tilt-disabled")) startLoop();
+          });
+          w.addEventListener("pointerleave", function () {
+            w._tilt.target = { rx: 0, ry: 0, tz: 0, scale: 1 };
+            clearActive();
+          });
+          w.addEventListener("pointermove", function (e) {
+            if (!w.classList.contains("is-active")) return;
+            if (document.body.classList.contains("tilt-disabled")) return;
+            var rect = w.getBoundingClientRect();
+            var px = (e.clientX - rect.left) / rect.width;
+            var py = (e.clientY - rect.top) / rect.height;
+            var dx = (px - 0.5) * 2;
+            var dy = (py - 0.5) * 2;
+            var maxTilt = 12;
+            var rx = -dy * maxTilt;
+            var ry = dx * maxTilt;
+            var tz = Math.max(
+              6,
+              Math.min(18, (1 - (Math.abs(dx) + Math.abs(dy)) / 2) * 18)
+            );
+            w._tilt.target.rx = rx;
+            w._tilt.target.ry = ry;
+            w._tilt.target.tz = tz;
+            w._tilt.target.scale = 1.02;
+            startLoop();
+          });
 
-                // global intensity (1.0 default) applied multiplicatively to wiggle amps
-                window._wiggleIntensity = window._wiggleIntensity || 1.0;
-
-                function lerp(a, b, t) { return a + (b - a) * t; }
-
-                function applyTransform(c, wigX, wigY) {
-                    // apply inline transform using numeric units; wigX/wigY are pixel offsets
-                    wigX = wigX || 0;
-                    wigY = wigY || 0;
-                    var transform = 'perspective(800px) translate3d(' + wigX.toFixed(2) + 'px,' + wigY.toFixed(2) + 'px,' + c.tz.toFixed(2) + 'px) rotateX(' + c.rx.toFixed(2) + 'deg) rotateY(' + c.ry.toFixed(2) + 'deg) scale(' + c.scale.toFixed(3) + ')';
-                    w.style.transform = transform;
-                }
-
-                function tick() {
-                    var t = 0.16; // smoothing
-                    var cur = w._tilt.current;
-                    var tar = w._tilt.target;
-                    cur.rx = lerp(cur.rx, tar.rx, t);
-                    cur.ry = lerp(cur.ry, tar.ry, t);
-                    cur.tz = lerp(cur.tz, tar.tz, 0.12);
-                    cur.scale = lerp(cur.scale, tar.scale, 0.08);
-
-                    // compute wiggle offsets if enabled and user doesn't prefer reduced motion
-                    var wiggleEnabled = !document.body.classList.contains('wiggle-disabled') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-                    var wigX = 0, wigY = 0;
-                    if (wiggleEnabled) {
-                        var s = w._wiggle;
-                        var now = performance.now() / 1000;
-                        var phase = s.phase + now * s.speed;
-                        var inten = (typeof window._wiggleIntensity === 'number') ? window._wiggleIntensity : 1.0;
-                        // apply intensity multiplier
-                        wigX = Math.sin(phase) * s.ampX * inten;
-                        wigY = Math.cos(phase * 0.92) * s.ampY * inten;
-                    }
-
-                    applyTransform(cur, wigX, wigY);
-
-                    // stop RAF only if we're near the tilt target and wiggle is disabled
-                    var near = Math.abs(cur.rx - tar.rx) < 0.05 && Math.abs(cur.ry - tar.ry) < 0.05 && Math.abs(cur.tz - tar.tz) < 0.5 && Math.abs(cur.scale - tar.scale) < 0.005;
-                    if (near && !w.classList.contains('is-active') && !wiggleEnabled) {
-                        w._tilt.raf = null;
-                        // final reset
-                        w.style.transform = '';
-                        return;
-                    }
-                    w._tilt.raf = requestAnimationFrame(tick);
-                }
-
-                function startLoop() { if (!w._tilt.raf) w._tilt.raf = requestAnimationFrame(tick); }
-                // expose start helper so external callers (like settings) can start the widget's RAF loop
-                w._tilt.start = startLoop;
-
-                // pointer handlers
-                w.addEventListener('pointerenter', function(){
-                    setActive(w);
-                    if (!document.body.classList.contains('tilt-disabled')) startLoop();
-                });
-                w.addEventListener('pointerleave', function(){
-                    w._tilt.target = { rx: 0, ry: 0, tz: 0, scale: 1 };
-                    clearActive();
-                });
-                w.addEventListener('pointermove', function(e){
-                    if (!w.classList.contains('is-active')) return;
-                    if (document.body.classList.contains('tilt-disabled')) return;
-                    var rect = w.getBoundingClientRect();
-                    var px = (e.clientX - rect.left) / rect.width;
-                    var py = (e.clientY - rect.top) / rect.height;
-                    var dx = (px - 0.5) * 2;
-                    var dy = (py - 0.5) * 2;
-                    var maxTilt = 12;
-                    var rx = -dy * maxTilt;
-                    var ry = dx * maxTilt;
-                    var tz = Math.max(6, Math.min(18, (1 - (Math.abs(dx)+Math.abs(dy))/2) * 18));
-                    w._tilt.target.rx = rx; w._tilt.target.ry = ry; w._tilt.target.tz = tz; w._tilt.target.scale = 1.02;
-                    startLoop();
-                });
-
-                // keyboard accessibility
-                if (!w.hasAttribute('tabindex')) w.setAttribute('tabindex', '0');
-                w.addEventListener('focus', function(){ setActive(w); if (!document.body.classList.contains('tilt-disabled')) startLoop(); });
-                w.addEventListener('blur', function(){ w._tilt.target = { rx:0, ry:0, tz:0, scale:1 }; clearActive(); });
-                w.addEventListener('pointercancel', function(){ w._tilt.target = { rx:0, ry:0, tz:0, scale:1 }; clearActive(); });
-            });
-
-            // expose helper to start wiggle loops for all widgets (used when enabling wiggle in settings)
-            window._cardControls = window._cardControls || {};
-            window._cardControls.startAllWiggles = function() {
-                widgets.forEach(function(w){ try { if (w && w._tilt && typeof w._tilt.start === 'function') w._tilt.start(); } catch(e){} });
-            };
-
-            // Also remove the class if the user clicks outside any widget (safety)
-            document.addEventListener('pointerdown', function(e){
-                if (!e.target.closest || !e.target.closest('.widget')) clearActive();
-            });
-        })();
-        // Clock
-        function getWeekNumber(date) {
-            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-            const dayNum = d.getUTCDay() || 7;
-            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-        }
-
-        let previousDigits = ['0', '0', ':', '0', '0', ':', '0', '0'];
-        let firstUpdate = true;
-
-        function updateClock() {
-            const now = new Date();
-            // Build guaranteed 2-digit hour/minute/second components
-            const hh = String(now.getHours()).padStart(2, '0');
-            const mm = String(now.getMinutes()).padStart(2, '0');
-            const ss = String(now.getSeconds()).padStart(2, '0');
-            const newDigits = [hh[0], hh[1], ':', mm[0], mm[1], ':', ss[0], ss[1]];
-
-            const date = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            const weekNum = getWeekNumber(now);
-            document.getElementById('date').textContent = `${date} - Week ${weekNum}`;
-
-                // Update greeting prefix but preserve the editable name span
-                const hour = now.getHours();
-                let prefix = 'Good ';
-                if (hour < 6) prefix += 'night';
-                else if (hour < 12) prefix += 'morning';
-                else if (hour < 18) prefix += 'afternoon';
-                else if (hour < 22) prefix += 'evening';
-                else prefix += 'night';
-                // find greeting container and update only the prefix text node
-                const greetingEl = document.getElementById('greeting');
-                const nameSpan = document.getElementById('greeting-name');
-                if (greetingEl) {
-                    // If the first child is a text node containing the prefix, update it; otherwise reconstruct safely
-                    const first = greetingEl.firstChild;
-                    const desired = `${prefix}, `;
-                    if (first && first.nodeType === Node.TEXT_NODE) first.textContent = desired;
-                    else {
-                        // clear and re-append
-                        greetingEl.innerHTML = '';
-                        greetingEl.appendChild(document.createTextNode(desired));
-                        if (nameSpan) greetingEl.appendChild(nameSpan);
-                    }
-                }
-
-            // Animate changing digits (fixed sequencing: old slides up, then new slides in from below)
-            const digitIds = ['h1', 'h2', 'colon1', 'm1', 'm2', 'colon2', 's1', 's2'];
-            for (let i = 0; i < newDigits.length; i++) {
-                const id = digitIds[i];
-                const digitElement = document.getElementById(id);
-                if (newDigits[i] !== previousDigits[i] && !firstUpdate) {
-                    // Create old and new spans (sequential animation)
-                    const oldSpan = document.createElement('span');
-                    oldSpan.className = 'anim-digit';
-                    oldSpan.textContent = previousDigits[i];
-                    oldSpan.style.position = 'absolute';
-                    oldSpan.style.left = '0';
-                    oldSpan.style.top = '0';
-                    oldSpan.style.width = '100%';
-                    oldSpan.style.display = 'inline-block';
-                    oldSpan.style.transform = 'translateY(0)';
-                    oldSpan.style.transition = 'transform 0.18s ease';
-                    oldSpan.style.zIndex = '2';
-
-                    const newSpan = document.createElement('span');
-                    newSpan.className = 'anim-digit';
-                    newSpan.textContent = newDigits[i];
-                    newSpan.style.position = 'absolute';
-                    newSpan.style.left = '0';
-                    newSpan.style.top = '0';
-                    newSpan.style.width = '100%';
-                    newSpan.style.display = 'inline-block';
-                    newSpan.style.transform = 'translateY(100%)';
-                    newSpan.style.transition = 'transform 0.18s ease';
-                    newSpan.style.visibility = 'hidden';
-                    newSpan.style.zIndex = '1';
-
-                    // Preserve container height to avoid layout jumps
-                    const containerHeight = digitElement.offsetHeight + 'px';
-                    digitElement.style.height = containerHeight;
-                    digitElement.style.lineHeight = containerHeight;
-
-                    // Clear container and append spans
-                    digitElement.innerHTML = '';
-                    digitElement.appendChild(oldSpan);
-                    digitElement.appendChild(newSpan);
-
-                    // Force layout
-                    void oldSpan.offsetWidth;
-
-                    // Make sure new span is visible and positioned below, then animate both simultaneously
-                    newSpan.style.visibility = 'visible';
-                    newSpan.style.transform = 'translateY(100%)';
-                    // force layout for newSpan
-                    void newSpan.offsetWidth;
-
-                    // Animate: old slides up, new slides into place
-                    oldSpan.style.transform = 'translateY(-100%)';
-                    newSpan.style.transform = 'translateY(0)';
-
-                    // After animation completes, set final text and clean up
-                    setTimeout(() => {
-                        digitElement.innerHTML = newDigits[i];
-                        digitElement.style.position = '';
-                        digitElement.style.overflow = '';
-                        digitElement.style.width = '';
-                        digitElement.style.height = '';
-                        digitElement.style.lineHeight = '';
-                    }, 220);
-                } else {
-                    digitElement.textContent = newDigits[i];
-                }
-            }
-            previousDigits = [...newDigits];
-            firstUpdate = false;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        // Pomodoro Timer
-    let timerInterval;
-    let workDuration = 25 * 60;
-    let breakDuration = 5 * 60;
-    let timeLeft = workDuration; // in seconds
-    let isWork = true;
-    let isRunning = false;
-
-        function updateTimerDisplay() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            document.getElementById('timer').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        function startTimer() {
-            if (!isRunning) {
-                isRunning = true;
-                // disable inline editing while running
-                const tEl = document.getElementById('timer');
-                if (tEl) { tEl.setAttribute('contenteditable', 'false'); tEl.classList.add('disabled'); }
-                timerInterval = setInterval(() => {
-                    timeLeft--;
-                    updateTimerDisplay();
-                    if (timeLeft <= 0) {
-                        clearInterval(timerInterval);
-                        isRunning = false;
-                        if (isWork) {
-                            timeLeft = breakDuration; // break
-                            isWork = false;
-                            document.getElementById('status').textContent = 'Break Time';
-                        } else {
-                            timeLeft = workDuration; // back to work
-                            isWork = true;
-                            document.getElementById('status').textContent = 'Work Session';
-                        }
-                        updateTimerDisplay();
-                        alert(isWork ? 'Break time over! Back to work.' : 'Work session complete! Take a break.');
-                    }
-                }, 1000);
-            }
-        }
-
-        function pauseTimer() {
-            clearInterval(timerInterval);
-            isRunning = false;
-            // re-enable inline editing while paused
-            const tElPause = document.getElementById('timer');
-            if (tElPause) { tElPause.setAttribute('contenteditable', 'true'); tElPause.classList.remove('disabled'); }
-        }
-
-        function resetTimer() {
-            clearInterval(timerInterval);
-            isRunning = false;
-            timeLeft = workDuration;
-            isWork = true;
-            document.getElementById('status').textContent = 'Work Session';
-            updateTimerDisplay();
-            const tElReset = document.getElementById('timer');
-            if (tElReset) { tElReset.setAttribute('contenteditable', 'true'); tElReset.classList.remove('disabled'); }
-        }
-        // wire new controls
-    const toggleBtn = document.getElementById('toggle');
-    const toggleIcon = document.getElementById('toggle-icon');
-    const resetBtn = document.getElementById('reset');
-
-        function updateToggleIcon() {
-            if (isRunning) {
-                toggleIcon.className = 'fa-solid fa-pause';
-            } else {
-                toggleIcon.className = 'fa-solid fa-play';
-            }
-        }
-
-        function parseTimerTextToSeconds(text) {
-            if (!text) return null;
-            const t = text.trim();
-            // accept MM:SS or M:SS or MM
-            const parts = t.split(':');
-            if (parts.length === 1) {
-                const m = parseInt(parts[0].replace(/[^0-9]/g,''), 10);
-                if (isNaN(m)) return null;
-                return m * 60;
-            }
-            if (parts.length === 2) {
-                const m = parseInt(parts[0].replace(/[^0-9]/g,''), 10);
-                const s = parseInt(parts[1].replace(/[^0-9]/g,''), 10);
-                if (isNaN(m) || isNaN(s)) return null;
-                return m * 60 + Math.max(0, Math.min(59, s));
-            }
-            return null;
-        }
-
-        const timerEl = document.getElementById('timer');
-        if (timerEl) {
-            timerEl.addEventListener('focus', (ev) => {
-                // don't allow entering edit mode while running
-                if (isRunning) { ev.target.blur(); return; }
-                // select all
-                document.execCommand('selectAll', false, null);
-            });
-
-            timerEl.addEventListener('keydown', (e) => {
-                // if running, block all editing keys
-                if (isRunning) { e.preventDefault(); return; }
-                // allow digits, colon, backspace, delete, arrows, enter, tab
-                const allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Enter','Tab',':'];
-                if (allowed.includes(e.key)) return;
-                if (/^[0-9]$/.test(e.key)) return;
-                e.preventDefault();
-            });
-
-            timerEl.addEventListener('blur', () => {
-                const secs = parseTimerTextToSeconds(timerEl.textContent || '');
-                if (secs !== null) {
-                    workDuration = secs;
-                    timeLeft = secs;
-                    updateTimerDisplay();
-                } else {
-                    // revert to previous
-                    updateTimerDisplay();
-                }
-            });
-        }
-
-        toggleBtn.addEventListener('click', () => {
-            // if user edited timer, parse and apply before starting
-            const secs = parseTimerTextToSeconds(timerEl ? (timerEl.textContent || '') : '');
-            if (secs !== null) {
-                workDuration = secs;
-                // if not running, set current timeLeft to the edited value
-                if (!isRunning) timeLeft = secs;
-            }
-            if (isRunning) pauseTimer();
-            else startTimer();
-            updateToggleIcon();
+          // keyboard accessibility
+          if (!w.hasAttribute("tabindex")) w.setAttribute("tabindex", "0");
+          w.addEventListener("focus", function () {
+            setActive(w);
+            if (!document.body.classList.contains("tilt-disabled")) startLoop();
+          });
+          w.addEventListener("blur", function () {
+            w._tilt.target = { rx: 0, ry: 0, tz: 0, scale: 1 };
+            clearActive();
+          });
+          w.addEventListener("pointercancel", function () {
+            w._tilt.target = { rx: 0, ry: 0, tz: 0, scale: 1 };
+            clearActive();
+          });
         });
 
-        resetBtn.addEventListener('click', () => {
-            resetTimer();
-            updateToggleIcon();
-        });
-        // initialize icon
-        updateToggleIcon();
-        updateTimerDisplay();
-
-        // Editable durations handlers removed — timer is edited inline via the timer element
-
-        // Weather
-        async function fetchWeather() {
+        // expose helper to start wiggle loops for all widgets (used when enabling wiggle in settings)
+        window._cardControls = window._cardControls || {};
+        window._cardControls.startAllWiggles = function () {
+          widgets.forEach(function (w) {
             try {
-                // Using wttr.in for weather data (no API key required)
-                const response = await fetch('https://wttr.in/?format=j1');
-                const data = await response.json();
-                const current = data.current_condition[0];
-                const temp = current.temp_C;
-                const desc = current.weatherDesc[0].value;
+              if (w && w._tilt && typeof w._tilt.start === "function")
+                w._tilt.start();
+            } catch (e) {}
+          });
+        };
 
-                document.querySelector('.weather-temp').textContent = `${temp}°C`;
-                document.querySelector('.weather-desc').textContent = desc;
-            } catch (error) {
-                document.querySelector('.weather-desc').textContent = 'Unable to fetch weather';
-                console.error('Weather fetch error:', error);
-            }
+        // Also remove the class if the user clicks outside any widget (safety)
+        document.addEventListener("pointerdown", function (e) {
+          if (!e.target.closest || !e.target.closest(".widget")) clearActive();
+        });
+      })();
+      // Clock
+      function getWeekNumber(date) {
+        const d = new Date(
+          Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+        );
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+      }
+
+      let previousDigits = ["0", "0", ":", "0", "0", ":", "0", "0"];
+      let firstUpdate = true;
+
+      function updateClock() {
+        const now = new Date();
+        // Build guaranteed 2-digit hour/minute/second components
+        const hh = String(now.getHours()).padStart(2, "0");
+        const mm = String(now.getMinutes()).padStart(2, "0");
+        const ss = String(now.getSeconds()).padStart(2, "0");
+        const newDigits = [hh[0], hh[1], ":", mm[0], mm[1], ":", ss[0], ss[1]];
+
+        const date = now.toLocaleDateString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+        const weekNum = getWeekNumber(now);
+        document.getElementById(
+          "date"
+        ).textContent = `${date} - Week ${weekNum}`;
+
+        // Update greeting prefix but preserve the editable name span
+        const hour = now.getHours();
+        let prefix = "Good ";
+        if (hour < 6) prefix += "night";
+        else if (hour < 12) prefix += "morning";
+        else if (hour < 18) prefix += "afternoon";
+        else if (hour < 22) prefix += "evening";
+        else prefix += "night";
+        // find greeting container and update only the prefix text node
+        const greetingEl = document.getElementById("greeting");
+        const nameSpan = document.getElementById("greeting-name");
+        if (greetingEl) {
+          // If the first child is a text node containing the prefix, update it; otherwise reconstruct safely
+          const first = greetingEl.firstChild;
+          const desired = `${prefix}, `;
+          if (first && first.nodeType === Node.TEXT_NODE)
+            first.textContent = desired;
+          else {
+            // clear and re-append
+            greetingEl.innerHTML = "";
+            greetingEl.appendChild(document.createTextNode(desired));
+            if (nameSpan) greetingEl.appendChild(nameSpan);
+          }
         }
-        fetchWeather();
-        setInterval(fetchWeather, 600000); // Update every 10 minutes
 
-        // YouTube Player - You can change the playlist ID to your preferred ambient music
-        // For now, using a placeholder. Replace with actual ambient music playlist
-        // Example: https://www.youtube.com/embed/videoseries?list=PLAYLIST_ID
+        // Animate changing digits (fixed sequencing: old slides up, then new slides in from below)
+        const digitIds = [
+          "h1",
+          "h2",
+          "colon1",
+          "m1",
+          "m2",
+          "colon2",
+          "s1",
+          "s2",
+        ];
+        for (let i = 0; i < newDigits.length; i++) {
+          const id = digitIds[i];
+          const digitElement = document.getElementById(id);
+          if (newDigits[i] !== previousDigits[i] && !firstUpdate) {
+            // Create old and new spans (sequential animation)
+            const oldSpan = document.createElement("span");
+            oldSpan.className = "anim-digit";
+            oldSpan.textContent = previousDigits[i];
+            oldSpan.style.position = "absolute";
+            oldSpan.style.left = "0";
+            oldSpan.style.top = "0";
+            oldSpan.style.width = "100%";
+            oldSpan.style.display = "inline-block";
+            oldSpan.style.transform = "translateY(0)";
+            oldSpan.style.transition = "transform 0.18s ease";
+            oldSpan.style.zIndex = "2";
+
+            const newSpan = document.createElement("span");
+            newSpan.className = "anim-digit";
+            newSpan.textContent = newDigits[i];
+            newSpan.style.position = "absolute";
+            newSpan.style.left = "0";
+            newSpan.style.top = "0";
+            newSpan.style.width = "100%";
+            newSpan.style.display = "inline-block";
+            newSpan.style.transform = "translateY(100%)";
+            newSpan.style.transition = "transform 0.18s ease";
+            newSpan.style.visibility = "hidden";
+            newSpan.style.zIndex = "1";
+
+            // Preserve container height to avoid layout jumps
+            const containerHeight = digitElement.offsetHeight + "px";
+            digitElement.style.height = containerHeight;
+            digitElement.style.lineHeight = containerHeight;
+
+            // Clear container and append spans
+            digitElement.innerHTML = "";
+            digitElement.appendChild(oldSpan);
+            digitElement.appendChild(newSpan);
+
+            // Force layout
+            void oldSpan.offsetWidth;
+
+            // Make sure new span is visible and positioned below, then animate both simultaneously
+            newSpan.style.visibility = "visible";
+            newSpan.style.transform = "translateY(100%)";
+            // force layout for newSpan
+            void newSpan.offsetWidth;
+
+            // Animate: old slides up, new slides into place
+            oldSpan.style.transform = "translateY(-100%)";
+            newSpan.style.transform = "translateY(0)";
+
+            // After animation completes, set final text and clean up
+            setTimeout(() => {
+              digitElement.innerHTML = newDigits[i];
+              digitElement.style.position = "";
+              digitElement.style.overflow = "";
+              digitElement.style.width = "";
+              digitElement.style.height = "";
+              digitElement.style.lineHeight = "";
+            }, 220);
+          } else {
+            digitElement.textContent = newDigits[i];
+          }
+        }
+        previousDigits = [...newDigits];
+        firstUpdate = false;
+      }
+      setInterval(updateClock, 1000);
+      updateClock();
+
+      // Pomodoro Timer
+      let timerInterval;
+      let workDuration = 25 * 60;
+      let breakDuration = 5 * 60;
+      let timeLeft = workDuration; // in seconds
+      let isWork = true;
+      let isRunning = false;
+
+      function updateTimerDisplay() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        document.getElementById("timer").textContent = `${minutes
+          .toString()
+          .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+      }
+
+      function startTimer() {
+        if (!isRunning) {
+          isRunning = true;
+          // disable inline editing while running
+          const tEl = document.getElementById("timer");
+          if (tEl) {
+            tEl.setAttribute("contenteditable", "false");
+            tEl.classList.add("disabled");
+          }
+          timerInterval = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay();
+            if (timeLeft <= 0) {
+              clearInterval(timerInterval);
+              isRunning = false;
+              if (isWork) {
+                timeLeft = breakDuration; // break
+                isWork = false;
+                document.getElementById("status").textContent = "Break Time";
+              } else {
+                timeLeft = workDuration; // back to work
+                isWork = true;
+                document.getElementById("status").textContent = "Work Session";
+              }
+              updateTimerDisplay();
+              alert(
+                isWork
+                  ? "Break time over! Back to work."
+                  : "Work session complete! Take a break."
+              );
+            }
+          }, 1000);
+        }
+      }
+
+      function pauseTimer() {
+        clearInterval(timerInterval);
+        isRunning = false;
+        // re-enable inline editing while paused
+        const tElPause = document.getElementById("timer");
+        if (tElPause) {
+          tElPause.setAttribute("contenteditable", "true");
+          tElPause.classList.remove("disabled");
+        }
+      }
+
+      function resetTimer() {
+        clearInterval(timerInterval);
+        isRunning = false;
+        timeLeft = workDuration;
+        isWork = true;
+        document.getElementById("status").textContent = "Work Session";
+        updateTimerDisplay();
+        const tElReset = document.getElementById("timer");
+        if (tElReset) {
+          tElReset.setAttribute("contenteditable", "true");
+          tElReset.classList.remove("disabled");
+        }
+      }
+      // wire new controls
+      const toggleBtn = document.getElementById("toggle");
+      const toggleIcon = document.getElementById("toggle-icon");
+      const resetBtn = document.getElementById("reset");
+
+      function updateToggleIcon() {
+        if (isRunning) {
+          toggleIcon.className = "fa-solid fa-pause";
+        } else {
+          toggleIcon.className = "fa-solid fa-play";
+        }
+      }
+
+      function parseTimerTextToSeconds(text) {
+        if (!text) return null;
+        const t = text.trim();
+        // accept MM:SS or M:SS or MM
+        const parts = t.split(":");
+        if (parts.length === 1) {
+          const m = parseInt(parts[0].replace(/[^0-9]/g, ""), 10);
+          if (isNaN(m)) return null;
+          return m * 60;
+        }
+        if (parts.length === 2) {
+          const m = parseInt(parts[0].replace(/[^0-9]/g, ""), 10);
+          const s = parseInt(parts[1].replace(/[^0-9]/g, ""), 10);
+          if (isNaN(m) || isNaN(s)) return null;
+          return m * 60 + Math.max(0, Math.min(59, s));
+        }
+        return null;
+      }
+
+      const timerEl = document.getElementById("timer");
+      if (timerEl) {
+        timerEl.addEventListener("focus", (ev) => {
+          // don't allow entering edit mode while running
+          if (isRunning) {
+            ev.target.blur();
+            return;
+          }
+          // select all
+          document.execCommand("selectAll", false, null);
+        });
+
+        timerEl.addEventListener("keydown", (e) => {
+          // if running, block all editing keys
+          if (isRunning) {
+            e.preventDefault();
+            return;
+          }
+          // allow digits, colon, backspace, delete, arrows, enter, tab
+          const allowed = [
+            "Backspace",
+            "Delete",
+            "ArrowLeft",
+            "ArrowRight",
+            "ArrowUp",
+            "ArrowDown",
+            "Enter",
+            "Tab",
+            ":",
+          ];
+          if (allowed.includes(e.key)) return;
+          if (/^[0-9]$/.test(e.key)) return;
+          e.preventDefault();
+        });
+
+        timerEl.addEventListener("blur", () => {
+          const secs = parseTimerTextToSeconds(timerEl.textContent || "");
+          if (secs !== null) {
+            workDuration = secs;
+            timeLeft = secs;
+            updateTimerDisplay();
+          } else {
+            // revert to previous
+            updateTimerDisplay();
+          }
+        });
+      }
+
+      toggleBtn.addEventListener("click", () => {
+        // if user edited timer, parse and apply before starting
+        const secs = parseTimerTextToSeconds(
+          timerEl ? timerEl.textContent || "" : ""
+        );
+        if (secs !== null) {
+          workDuration = secs;
+          // if not running, set current timeLeft to the edited value
+          if (!isRunning) timeLeft = secs;
+        }
+        if (isRunning) pauseTimer();
+        else startTimer();
+        updateToggleIcon();
+      });
+
+      resetBtn.addEventListener("click", () => {
+        resetTimer();
+        updateToggleIcon();
+      });
+      // initialize icon
+      updateToggleIcon();
+      updateTimerDisplay();
+
+      // Editable durations handlers removed — timer is edited inline via the timer element
+
+      // Weather
+      async function fetchWeather() {
+        try {
+          // Using wttr.in for weather data (no API key required)
+          const response = await fetch("https://wttr.in/?format=j1");
+          const data = await response.json();
+          const current = data.current_condition[0];
+          const temp = current.temp_C;
+          const desc = current.weatherDesc[0].value;
+
+          document.querySelector(".weather-temp").textContent = `${temp}°C`;
+          document.querySelector(".weather-desc").textContent = desc;
+        } catch (error) {
+          document.querySelector(".weather-desc").textContent =
+            "Unable to fetch weather";
+          console.error("Weather fetch error:", error);
+        }
+      }
+      fetchWeather();
+      setInterval(fetchWeather, 600000); // Update every 10 minutes
+
+      // YouTube Player - You can change the playlist ID to your preferred ambient music
+      // For now, using a placeholder. Replace with actual ambient music playlist
+      // Example: https://www.youtube.com/embed/videoseries?list=PLAYLIST_ID
     </script>
     <script>
-        // Settings: YouTube preference persisted in localStorage
-        (function(){
-            const COG = document.getElementById('settings-cog');
-            const BACKDROP = document.getElementById('settings-backdrop');
-            const SAVE = document.getElementById('settings-save');
-            const CANCEL = document.getElementById('settings-cancel');
-            const RESET = document.getElementById('settings-reset');
-            const INPUT = document.getElementById('youtube-url');
-            const SHOW_SECONDS = document.getElementById('show-seconds');
-            const ENABLE_TILT = document.getElementById('enable-tilt');
-            const IFRAME = document.getElementById('youtube-iframe');
-            const CLOCK = document.getElementById('clock');
-            const LS_KEY = 'preferred_youtube_id';
-            const LS_KEY_SHOW = 'show_seconds';
-            const LS_KEY_TILT = 'ui_enable_tilt';
-            const LS_KEY_WIGGLE = 'ui_enable_wiggle';
-            const LS_KEY_WIGGLE_INTENSITY = 'ui_wiggle_intensity';
-            const LS_KEY_THEME = 'ui_theme_mode';
-            var mediaPref = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+      // Settings: YouTube preference persisted in localStorage
+      (function () {
+        const COG = document.getElementById("settings-cog");
+        const BACKDROP = document.getElementById("settings-backdrop");
+        const SAVE = document.getElementById("settings-save");
+        const CANCEL = document.getElementById("settings-cancel");
+        const RESET = document.getElementById("settings-reset");
+        const INPUT = document.getElementById("youtube-url");
+        const SHOW_SECONDS = document.getElementById("show-seconds");
+        const ENABLE_TILT = document.getElementById("enable-tilt");
+        const IFRAME = document.getElementById("youtube-iframe");
+        const CLOCK = document.getElementById("clock");
+        const LS_KEY = "preferred_youtube_id";
+        const LS_KEY_SHOW = "show_seconds";
+        const LS_KEY_TILT = "ui_enable_tilt";
+        const LS_KEY_WIGGLE = "ui_enable_wiggle";
+        const LS_KEY_WIGGLE_INTENSITY = "ui_wiggle_intensity";
+        const LS_KEY_THEME = "ui_theme_mode";
+        var mediaPref =
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)");
 
-            function applyTheme(mode) {
-                // mode: 'system'|'light'|'dark'
-                if (mode === 'system') {
-                    var isDark = mediaPref ? mediaPref.matches : false;
-                    if (isDark) document.body.classList.add('dark-mode'); else document.body.classList.remove('dark-mode');
-                } else if (mode === 'dark') {
-                    document.body.classList.add('dark-mode');
-                } else {
-                    document.body.classList.remove('dark-mode');
-                }
-            }
+        function applyTheme(mode) {
+          // mode: 'system'|'light'|'dark'
+          if (mode === "system") {
+            var isDark = mediaPref ? mediaPref.matches : false;
+            if (isDark) document.body.classList.add("dark-mode");
+            else document.body.classList.remove("dark-mode");
+          } else if (mode === "dark") {
+            document.body.classList.add("dark-mode");
+          } else {
+            document.body.classList.remove("dark-mode");
+          }
+        }
 
-            function onSystemPrefChange(e) {
-                var chosen = localStorage.getItem(LS_KEY_THEME) || 'system';
-                if (chosen === 'system') applyTheme('system');
-            }
+        function onSystemPrefChange(e) {
+          var chosen = localStorage.getItem(LS_KEY_THEME) || "system";
+          if (chosen === "system") applyTheme("system");
+        }
 
-            function parseYouTubeId(input) {
-                if (!input) return null;
-                input = input.trim();
-                // if looks like an ID (11+ chars alnum-_)
-                const idMatch = input.match(/[A-Za-z0-9_-]{11,}/);
-                if (idMatch) return idMatch[0];
-                return null;
-            }
+        function parseYouTubeId(input) {
+          if (!input) return null;
+          input = input.trim();
+          // if looks like an ID (11+ chars alnum-_)
+          const idMatch = input.match(/[A-Za-z0-9_-]{11,}/);
+          if (idMatch) return idMatch[0];
+          return null;
+        }
 
-            function setIframeById(id) {
-                if (!id) return;
-                IFRAME.src = `https://www.youtube.com/embed/${id}?rel=0`;
-            }
+        function setIframeById(id) {
+          if (!id) return;
+          IFRAME.src = `https://www.youtube.com/embed/${id}?rel=0`;
+        }
 
-            function applyShowSeconds(shouldShow) {
-                if (!CLOCK) return;
-                if (shouldShow) CLOCK.classList.remove('no-seconds');
-                else CLOCK.classList.add('no-seconds');
-            }
+        function applyShowSeconds(shouldShow) {
+          if (!CLOCK) return;
+          if (shouldShow) CLOCK.classList.remove("no-seconds");
+          else CLOCK.classList.add("no-seconds");
+        }
 
-            function openSettings() {
-                const saved = localStorage.getItem(LS_KEY);
-                const savedShow = localStorage.getItem(LS_KEY_SHOW);
-                INPUT.value = saved || IFRAME.dataset.defaultId || '';
-                // default: show seconds (true) when no preference set
-                const show = (savedShow === null) ? true : (savedShow === 'true');
-                SHOW_SECONDS.checked = show;
-                const tiltSaved = localStorage.getItem(LS_KEY_TILT);
-                const tiltOn = (tiltSaved === null) ? true : (tiltSaved === 'true');
-                ENABLE_TILT.checked = tiltOn;
-                const wigSaved = localStorage.getItem(LS_KEY_WIGGLE);
-                const wigOn = (wigSaved === null) ? true : (wigSaved === 'true');
-                var ENABLE_WIGGLE = document.getElementById('enable-wiggle');
-                if (ENABLE_WIGGLE) ENABLE_WIGGLE.checked = wigOn;
-                var INTENSITY = document.getElementById('enable-wiggle-intensity');
-                const savedIntensity = localStorage.getItem(LS_KEY_WIGGLE_INTENSITY) || 'medium';
-                if (INTENSITY) INTENSITY.value = savedIntensity;
-                BACKDROP.style.display = 'flex';
-                BACKDROP.setAttribute('aria-hidden','false');
-                // focus the input for convenience
-                INPUT.focus();
-            }
+        function openSettings() {
+          const saved = localStorage.getItem(LS_KEY);
+          const savedShow = localStorage.getItem(LS_KEY_SHOW);
+          INPUT.value = saved || IFRAME.dataset.defaultId || "";
+          // default: show seconds (true) when no preference set
+          const show = savedShow === null ? true : savedShow === "true";
+          SHOW_SECONDS.checked = show;
+          const tiltSaved = localStorage.getItem(LS_KEY_TILT);
+          const tiltOn = tiltSaved === null ? true : tiltSaved === "true";
+          ENABLE_TILT.checked = tiltOn;
+          const wigSaved = localStorage.getItem(LS_KEY_WIGGLE);
+          const wigOn = wigSaved === null ? true : wigSaved === "true";
+          var ENABLE_WIGGLE = document.getElementById("enable-wiggle");
+          if (ENABLE_WIGGLE) ENABLE_WIGGLE.checked = wigOn;
+          var INTENSITY = document.getElementById("enable-wiggle-intensity");
+          const savedIntensity =
+            localStorage.getItem(LS_KEY_WIGGLE_INTENSITY) || "medium";
+          if (INTENSITY) INTENSITY.value = savedIntensity;
+          BACKDROP.style.display = "flex";
+          BACKDROP.setAttribute("aria-hidden", "false");
+          // focus the input for convenience
+          INPUT.focus();
+        }
 
-            function closeSettings() {
-                BACKDROP.style.display = 'none';
-                BACKDROP.setAttribute('aria-hidden','true');
-            }
+        function closeSettings() {
+          BACKDROP.style.display = "none";
+          BACKDROP.setAttribute("aria-hidden", "true");
+        }
 
-            COG.addEventListener('click', openSettings);
-            CANCEL.addEventListener('click', closeSettings);
-            BACKDROP.addEventListener('click', (e)=> { if (e.target === BACKDROP) closeSettings(); });
+        COG.addEventListener("click", openSettings);
+        CANCEL.addEventListener("click", closeSettings);
+        BACKDROP.addEventListener("click", (e) => {
+          if (e.target === BACKDROP) closeSettings();
+        });
 
-            SAVE.addEventListener('click', () => {
-                // persist show-seconds regardless of the YouTube input
-                const showVal = !!SHOW_SECONDS.checked;
-                localStorage.setItem(LS_KEY_SHOW, showVal ? 'true' : 'false');
-                applyShowSeconds(showVal);
-                // persist tilt preference
-                const tiltVal = !!ENABLE_TILT.checked;
-                localStorage.setItem(LS_KEY_TILT, tiltVal ? 'true' : 'false');
-                if (tiltVal) document.body.classList.remove('tilt-disabled'); else document.body.classList.add('tilt-disabled');
+        SAVE.addEventListener("click", () => {
+          // persist show-seconds regardless of the YouTube input
+          const showVal = !!SHOW_SECONDS.checked;
+          localStorage.setItem(LS_KEY_SHOW, showVal ? "true" : "false");
+          applyShowSeconds(showVal);
+          // persist tilt preference
+          const tiltVal = !!ENABLE_TILT.checked;
+          localStorage.setItem(LS_KEY_TILT, tiltVal ? "true" : "false");
+          if (tiltVal) document.body.classList.remove("tilt-disabled");
+          else document.body.classList.add("tilt-disabled");
 
-                // persist wiggle preference
-                var ENABLE_WIGGLE_SAVE = document.getElementById('enable-wiggle');
-                var wigVal = ENABLE_WIGGLE_SAVE ? !!ENABLE_WIGGLE_SAVE.checked : true;
-                localStorage.setItem(LS_KEY_WIGGLE, wigVal ? 'true' : 'false');
-                if (wigVal) {
-                    document.body.classList.remove('wiggle-disabled');
-                    // start wiggle loops gently
-                    // save intensity selection too
-                    var INTENSITY_SAVE = document.getElementById('enable-wiggle-intensity');
-                    var intensityVal = INTENSITY_SAVE ? INTENSITY_SAVE.value : 'medium';
-                    localStorage.setItem(LS_KEY_WIGGLE_INTENSITY, intensityVal);
-                    // map intensity to multiplier
-                    var map = { low: 0.6, medium: 1.0, high: 1.6 };
-                    window._wiggleIntensity = map[intensityVal] || 1.0;
-                    if (window._cardControls && typeof window._cardControls.startAllWiggles === 'function') window._cardControls.startAllWiggles();
-                } else document.body.classList.add('wiggle-disabled');
+          // persist wiggle preference
+          var ENABLE_WIGGLE_SAVE = document.getElementById("enable-wiggle");
+          var wigVal = ENABLE_WIGGLE_SAVE ? !!ENABLE_WIGGLE_SAVE.checked : true;
+          localStorage.setItem(LS_KEY_WIGGLE, wigVal ? "true" : "false");
+          if (wigVal) {
+            document.body.classList.remove("wiggle-disabled");
+            // start wiggle loops gently
+            // save intensity selection too
+            var INTENSITY_SAVE = document.getElementById(
+              "enable-wiggle-intensity"
+            );
+            var intensityVal = INTENSITY_SAVE ? INTENSITY_SAVE.value : "medium";
+            localStorage.setItem(LS_KEY_WIGGLE_INTENSITY, intensityVal);
+            // map intensity to multiplier
+            var map = { low: 0.6, medium: 1.0, high: 1.6 };
+            window._wiggleIntensity = map[intensityVal] || 1.0;
+            if (
+              window._cardControls &&
+              typeof window._cardControls.startAllWiggles === "function"
+            )
+              window._cardControls.startAllWiggles();
+          } else document.body.classList.add("wiggle-disabled");
 
-                // persist theme choice
-                var THEME = document.getElementById('theme-mode');
-                var themeVal = THEME ? THEME.value : 'system';
-                localStorage.setItem(LS_KEY_THEME, themeVal);
-                applyTheme(themeVal);
+          // persist theme choice
+          var THEME = document.getElementById("theme-mode");
+          var themeVal = THEME ? THEME.value : "system";
+          localStorage.setItem(LS_KEY_THEME, themeVal);
+          applyTheme(themeVal);
 
-                // YouTube id is optional here; only save/apply if provided
-                const raw = (INPUT.value || '').trim();
-                if (raw === '') {
-                    closeSettings();
-                    return;
-                }
-                const id = parseYouTubeId(raw);
-                if (!id) { alert('Please paste a valid YouTube URL or ID.'); return; }
-                localStorage.setItem(LS_KEY, id);
-                setIframeById(id);
-                closeSettings();
-            });
+          // YouTube id is optional here; only save/apply if provided
+          const raw = (INPUT.value || "").trim();
+          if (raw === "") {
+            closeSettings();
+            return;
+          }
+          const id = parseYouTubeId(raw);
+          if (!id) {
+            alert("Please paste a valid YouTube URL or ID.");
+            return;
+          }
+          localStorage.setItem(LS_KEY, id);
+          setIframeById(id);
+          closeSettings();
+        });
 
-            RESET.addEventListener('click', () => {
-                const defaultId = IFRAME.dataset.defaultId;
-                localStorage.removeItem(LS_KEY);
-                localStorage.removeItem(LS_KEY_SHOW);
-                setIframeById(defaultId);
-                INPUT.value = defaultId || '';
-                // reset seconds to default (show)
-                SHOW_SECONDS.checked = true;
-                applyShowSeconds(true);
-                // reset tilt to default (enabled)
-                ENABLE_TILT.checked = true;
-                localStorage.removeItem(LS_KEY_TILT);
-                document.body.classList.remove('tilt-disabled');
-                // reset wiggle to default (enabled)
-                var ENABLE_WIGGLE_RST = document.getElementById('enable-wiggle');
-                if (ENABLE_WIGGLE_RST) ENABLE_WIGGLE_RST.checked = true;
-                localStorage.removeItem(LS_KEY_WIGGLE);
-                document.body.classList.remove('wiggle-disabled');
-                // reset intensity to medium
-                localStorage.removeItem(LS_KEY_WIGGLE_INTENSITY);
-                var INTENSITY_RST = document.getElementById('enable-wiggle-intensity');
-                if (INTENSITY_RST) INTENSITY_RST.value = 'medium';
-                window._wiggleIntensity = 1.0;
-                // reset theme to system
-                localStorage.removeItem(LS_KEY_THEME);
-                var THEME_RST = document.getElementById('theme-mode');
-                if (THEME_RST) THEME_RST.value = 'system';
-                applyTheme('system');
-            });
+        RESET.addEventListener("click", () => {
+          const defaultId = IFRAME.dataset.defaultId;
+          localStorage.removeItem(LS_KEY);
+          localStorage.removeItem(LS_KEY_SHOW);
+          setIframeById(defaultId);
+          INPUT.value = defaultId || "";
+          // reset seconds to default (show)
+          SHOW_SECONDS.checked = true;
+          applyShowSeconds(true);
+          // reset tilt to default (enabled)
+          ENABLE_TILT.checked = true;
+          localStorage.removeItem(LS_KEY_TILT);
+          document.body.classList.remove("tilt-disabled");
+          // reset wiggle to default (enabled)
+          var ENABLE_WIGGLE_RST = document.getElementById("enable-wiggle");
+          if (ENABLE_WIGGLE_RST) ENABLE_WIGGLE_RST.checked = true;
+          localStorage.removeItem(LS_KEY_WIGGLE);
+          document.body.classList.remove("wiggle-disabled");
+          // reset intensity to medium
+          localStorage.removeItem(LS_KEY_WIGGLE_INTENSITY);
+          var INTENSITY_RST = document.getElementById(
+            "enable-wiggle-intensity"
+          );
+          if (INTENSITY_RST) INTENSITY_RST.value = "medium";
+          window._wiggleIntensity = 1.0;
+          // reset theme to system
+          localStorage.removeItem(LS_KEY_THEME);
+          var THEME_RST = document.getElementById("theme-mode");
+          if (THEME_RST) THEME_RST.value = "system";
+          applyTheme("system");
+        });
 
-            // on load, apply saved id and show-seconds preference if present
-            const saved = localStorage.getItem(LS_KEY);
-            if (saved) setIframeById(saved);
-            const savedShow = localStorage.getItem(LS_KEY_SHOW);
-            const show = (savedShow === null) ? true : (savedShow === 'true');
-            applyShowSeconds(show);
-            // apply tilt preference
-            const tiltSaved = localStorage.getItem(LS_KEY_TILT);
-            const tiltOn = (tiltSaved === null) ? true : (tiltSaved === 'true');
-            if (!tiltOn) document.body.classList.add('tilt-disabled');
-            // apply wiggle preference
-            const wigSaved = localStorage.getItem(LS_KEY_WIGGLE);
-            const wigOn = (wigSaved === null) ? true : (wigSaved === 'true');
-            if (!wigOn) document.body.classList.add('wiggle-disabled');
-            else {
-                // start wiggle loops after a short defer so widgets exist
-                // load intensity and map to multiplier
-                const savedIntensity = localStorage.getItem(LS_KEY_WIGGLE_INTENSITY) || 'medium';
-                var map = { low: 0.6, medium: 1.0, high: 1.6 };
-                window._wiggleIntensity = map[savedIntensity] || 1.0;
-                setTimeout(function(){ if (window._cardControls && typeof window._cardControls.startAllWiggles === 'function') window._cardControls.startAllWiggles(); }, 80);
-            }
-            // apply theme preference
-            const themeSaved = localStorage.getItem(LS_KEY_THEME) || 'system';
-            var themeSel = document.getElementById('theme-mode');
-            if (themeSel) themeSel.value = themeSaved;
-            applyTheme(themeSaved);
-            // listen to system changes if available
-            if (mediaPref && mediaPref.addEventListener) mediaPref.addEventListener('change', onSystemPrefChange);
-            else if (mediaPref && mediaPref.addListener) mediaPref.addListener(onSystemPrefChange);
-        })();
+        // on load, apply saved id and show-seconds preference if present
+        const saved = localStorage.getItem(LS_KEY);
+        if (saved) setIframeById(saved);
+        const savedShow = localStorage.getItem(LS_KEY_SHOW);
+        const show = savedShow === null ? true : savedShow === "true";
+        applyShowSeconds(show);
+        // apply tilt preference
+        const tiltSaved = localStorage.getItem(LS_KEY_TILT);
+        const tiltOn = tiltSaved === null ? true : tiltSaved === "true";
+        if (!tiltOn) document.body.classList.add("tilt-disabled");
+        // apply wiggle preference
+        const wigSaved = localStorage.getItem(LS_KEY_WIGGLE);
+        const wigOn = wigSaved === null ? true : wigSaved === "true";
+        if (!wigOn) document.body.classList.add("wiggle-disabled");
+        else {
+          // start wiggle loops after a short defer so widgets exist
+          // load intensity and map to multiplier
+          const savedIntensity =
+            localStorage.getItem(LS_KEY_WIGGLE_INTENSITY) || "medium";
+          var map = { low: 0.6, medium: 1.0, high: 1.6 };
+          window._wiggleIntensity = map[savedIntensity] || 1.0;
+          setTimeout(function () {
+            if (
+              window._cardControls &&
+              typeof window._cardControls.startAllWiggles === "function"
+            )
+              window._cardControls.startAllWiggles();
+          }, 80);
+        }
+        // apply theme preference
+        const themeSaved = localStorage.getItem(LS_KEY_THEME) || "system";
+        var themeSel = document.getElementById("theme-mode");
+        if (themeSel) themeSel.value = themeSaved;
+        applyTheme(themeSaved);
+        // listen to system changes if available
+        if (mediaPref && mediaPref.addEventListener)
+          mediaPref.addEventListener("change", onSystemPrefChange);
+        else if (mediaPref && mediaPref.addListener)
+          mediaPref.addListener(onSystemPrefChange);
+      })();
     </script>
     <script>
-        // JS-driven quote rotator (replaces content from an internal array)
-        (function(){
-            const QUOTES = [
-                {text: 'The future depends on what you do today.', author: 'Mahatma Gandhi'},
-                {text: 'Success is the sum of small efforts, repeated day in and day out.', author: 'Robert Collier'},
-                {text: 'You don’t have to be extreme, just consistent.', author: 'Unknown'},
-                {text: 'Work hard in silence, let success make the noise.', author: 'Frank Ocean'},
-                {text: 'Clarity comes from engagement, not thought.', author: 'Marie Forleo'},
-                {text: 'Start where you are. Use what you have. Do what you can.', author: 'Arthur Ashe'},
-                {text: 'We are what we repeatedly do. Excellence, then, is not an act but a habit.', author: 'Aristotle'},
-                {text: 'Small daily improvements over time lead to stunning results.', author: 'Robin Sharma'},
-                {text: 'Dream big. Start small. Act now.', author: 'Robin Sharma'},
-                {text: 'Energy flows where attention goes.', author: 'Tony Robbins'},
-                {text: 'Don’t count the days, make the days count.', author: 'Muhammad Ali'},
-                {text: 'What you do every day matters more than what you do once in a while.', author: 'Gretchen Rubin'},
-                {text: 'Consistency is more important than intensity.', author: 'James Clear'},
-                {text: 'The best way to predict your future is to create it.', author: 'Peter Drucker'},
-                {text: 'Action is the foundational key to all success.', author: 'Pablo Picasso'},
-                {text: 'The secret of getting ahead is getting started.', author: 'Mark Twain'},
-                {text: 'You become what you give your attention to.', author: 'Epictetus'},
-                {text: 'Clarity of focus is the foundation of mastery.', author: 'Robin Sharma'},
-                {text: 'The quality of your attention determines the quality of your work.', author: 'Unknown'},
-                {text: 'Depth, not speed, is where progress lives.', author: 'Cal Newport'},
-                {text: 'Do less, but better.', author: 'Greg McKeown'},
-                {text: 'Simplicity is the ultimate sophistication.', author: 'Leonardo da Vinci'},
-                {text: 'Mastery is the art of focusing on what matters and letting go of what doesn’t.', author: 'Unknown'},
-                {text: 'Distraction is the enemy of depth.', author: 'Cal Newport'},
-                {text: 'Craftsmanship is devotion to detail, even when no one is watching.', author: 'Unknown'},
-                {text: 'Slow down. Focus deeply. Move deliberately.', author: 'Unknown'},
-                {text: 'Excellence is born from attention, not ambition.', author: 'Unknown'},
-                {text: 'The deep life is not lived by default; it is built intentionally.', author: 'Cal Newport'},
-                {text: 'Focus is a muscle. It strengthens with use and atrophies with neglect.', author: 'Unknown'},
-                {text: 'Do the work that only you can do.', author: 'Paul Graham'},
-                {text: 'Don’t chase opportunities. Build competence so opportunities chase you.', author: 'Cal Newport'},
-                {text: 'The pursuit of mastery is the path to meaning.', author: 'Robert Greene'},
-                {text: 'Concentration is the currency of progress.', author: 'Unknown'},
-                {text: 'What you choose to ignore defines you as much as what you pursue.', author: 'Unknown'},
-                {text: 'Attention is the rarest and purest form of generosity.', author: 'Simone Weil'},
-                {text: 'Work deeply. Rest deeply. Live deliberately.', author: 'Henry David Thoreau'},
-            ];
+      // JS-driven quote rotator (replaces content from an internal array)
+      (function () {
+        const QUOTES = [
+          {
+            text: "The future depends on what you do today.",
+            author: "Mahatma Gandhi",
+          },
+          {
+            text: "Success is the sum of small efforts, repeated day in and day out.",
+            author: "Robert Collier",
+          },
+          {
+            text: "You don’t have to be extreme, just consistent.",
+            author: "Unknown",
+          },
+          {
+            text: "Work hard in silence, let success make the noise.",
+            author: "Frank Ocean",
+          },
+          {
+            text: "Clarity comes from engagement, not thought.",
+            author: "Marie Forleo",
+          },
+          {
+            text: "Start where you are. Use what you have. Do what you can.",
+            author: "Arthur Ashe",
+          },
+          {
+            text: "We are what we repeatedly do. Excellence, then, is not an act but a habit.",
+            author: "Aristotle",
+          },
+          {
+            text: "Small daily improvements over time lead to stunning results.",
+            author: "Robin Sharma",
+          },
+          { text: "Dream big. Start small. Act now.", author: "Robin Sharma" },
+          {
+            text: "Energy flows where attention goes.",
+            author: "Tony Robbins",
+          },
+          {
+            text: "Don’t count the days, make the days count.",
+            author: "Muhammad Ali",
+          },
+          {
+            text: "What you do every day matters more than what you do once in a while.",
+            author: "Gretchen Rubin",
+          },
+          {
+            text: "Consistency is more important than intensity.",
+            author: "James Clear",
+          },
+          {
+            text: "The best way to predict your future is to create it.",
+            author: "Peter Drucker",
+          },
+          {
+            text: "Action is the foundational key to all success.",
+            author: "Pablo Picasso",
+          },
+          {
+            text: "The secret of getting ahead is getting started.",
+            author: "Mark Twain",
+          },
+          {
+            text: "You become what you give your attention to.",
+            author: "Epictetus",
+          },
+          {
+            text: "Clarity of focus is the foundation of mastery.",
+            author: "Robin Sharma",
+          },
+          {
+            text: "The quality of your attention determines the quality of your work.",
+            author: "Unknown",
+          },
+          {
+            text: "Depth, not speed, is where progress lives.",
+            author: "Cal Newport",
+          },
+          { text: "Do less, but better.", author: "Greg McKeown" },
+          {
+            text: "Simplicity is the ultimate sophistication.",
+            author: "Leonardo da Vinci",
+          },
+          {
+            text: "Mastery is the art of focusing on what matters and letting go of what doesn’t.",
+            author: "Unknown",
+          },
+          { text: "Distraction is the enemy of depth.", author: "Cal Newport" },
+          {
+            text: "Craftsmanship is devotion to detail, even when no one is watching.",
+            author: "Unknown",
+          },
+          {
+            text: "Slow down. Focus deeply. Move deliberately.",
+            author: "Unknown",
+          },
+          {
+            text: "Excellence is born from attention, not ambition.",
+            author: "Unknown",
+          },
+          {
+            text: "The deep life is not lived by default; it is built intentionally.",
+            author: "Cal Newport",
+          },
+          {
+            text: "Focus is a muscle. It strengthens with use and atrophies with neglect.",
+            author: "Unknown",
+          },
+          { text: "Do the work that only you can do.", author: "Paul Graham" },
+          {
+            text: "Don’t chase opportunities. Build competence so opportunities chase you.",
+            author: "Cal Newport",
+          },
+          {
+            text: "The pursuit of mastery is the path to meaning.",
+            author: "Robert Greene",
+          },
+          {
+            text: "Concentration is the currency of progress.",
+            author: "Unknown",
+          },
+          {
+            text: "What you choose to ignore defines you as much as what you pursue.",
+            author: "Unknown",
+          },
+          {
+            text: "Attention is the rarest and purest form of generosity.",
+            author: "Simone Weil",
+          },
+          {
+            text: "Work deeply. Rest deeply. Live deliberately.",
+            author: "Henry David Thoreau",
+          },
+        ];
 
-            const container = document.getElementById('quote-rotator');
-            const content = document.getElementById('quote-content');
-            const textEl = content.querySelector('.text');
-            const authorEl = content.querySelector('.author');
-            if (!container || !content) return;
+        const container = document.getElementById("quote-rotator");
+        const content = document.getElementById("quote-content");
+        const textEl = content.querySelector(".text");
+        const authorEl = content.querySelector(".author");
+        if (!container || !content) return;
 
-            function randomIndex() {
-                return Math.floor(Math.random() * QUOTES.length);
+        function randomIndex() {
+          return Math.floor(Math.random() * QUOTES.length);
+        }
+
+        let idx = randomIndex();
+        let timer = null;
+        const ROTATE_MS = 12000;
+
+        function render(i) {
+          const q = QUOTES[i];
+          // fade out
+          content.classList.remove("active");
+          setTimeout(() => {
+            textEl.textContent = q.text;
+            authorEl.textContent = "— " + q.author;
+            // fade in
+            content.classList.add("active");
+          }, 250);
+        }
+
+        function next() {
+          render(randomIndex());
+        }
+
+        function start() {
+          stop();
+          timer = setInterval(next, ROTATE_MS);
+        }
+
+        function stop() {
+          if (timer) {
+            clearInterval(timer);
+            timer = null;
+          }
+        }
+
+        // initial render
+        render(idx);
+
+        // Greeting name persistence: load stored name and wire up inline editing save
+        (function () {
+          const NAME_KEY = "greeting_name";
+          const nameSpan = document.getElementById("greeting-name");
+          if (!nameSpan) return;
+          // Initialize from storage if present
+          const stored = localStorage.getItem(NAME_KEY);
+          if (stored !== null && stored.trim() !== "")
+            nameSpan.textContent = stored;
+
+          // Save helper
+          function saveName() {
+            const val = (nameSpan.textContent || "").trim();
+            if (val === "") return; // don't save empty names
+            localStorage.setItem(NAME_KEY, val);
+          }
+
+          // Blur saves
+          nameSpan.addEventListener("blur", () => saveName());
+          // Enter saves and blurs (prevent newline)
+          nameSpan.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              nameSpan.blur();
             }
-
-            let idx = randomIndex();
-            let timer = null;
-            const ROTATE_MS = 12000;
-
-            function render(i) {
-                const q = QUOTES[i];
-                // fade out
-                content.classList.remove('active');
-                setTimeout(() => {
-                    textEl.textContent = q.text;
-                    authorEl.textContent = '— ' + q.author;
-                    // fade in
-                    content.classList.add('active');
-                }, 250);
-            }
-
-            function next() {
-                render(randomIndex());
-            }
-
-            function start() {
-                stop();
-                timer = setInterval(next, ROTATE_MS);
-            }
-
-            function stop() {
-                if (timer) { clearInterval(timer); timer = null; }
-            }
-
-            // initial render
-            render(idx);
-
-            // Greeting name persistence: load stored name and wire up inline editing save
-            (function(){
-                const NAME_KEY = 'greeting_name';
-                const nameSpan = document.getElementById('greeting-name');
-                if (!nameSpan) return;
-                // Initialize from storage if present
-                const stored = localStorage.getItem(NAME_KEY);
-                if (stored !== null && stored.trim() !== '') nameSpan.textContent = stored;
-
-                // Save helper
-                function saveName() {
-                    const val = (nameSpan.textContent || '').trim();
-                    if (val === '') return; // don't save empty names
-                    localStorage.setItem(NAME_KEY, val);
-                }
-
-                // Blur saves
-                nameSpan.addEventListener('blur', () => saveName());
-                // Enter saves and blurs (prevent newline)
-                nameSpan.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        nameSpan.blur();
-                    }
-                });
-            })();
-            start();
-
-            container.addEventListener('mouseenter', stop);
-            container.addEventListener('mouseleave', start);
-
-            // expose for debugging if needed
-            window._quoteRotator = {start, stop, next, render};
+          });
         })();
+        start();
+
+        container.addEventListener("mouseenter", stop);
+        container.addEventListener("mouseleave", start);
+
+        // expose for debugging if needed
+        window._quoteRotator = { start, stop, next, render };
+      })();
     </script>
     <!-- sprite walker canvas -->
-    <canvas id="sprite-canvas" style="position:fixed;left:0;right:0;bottom:0;height:140px;pointer-events:none;z-index:999;" aria-hidden="true"></canvas>
+    <canvas
+      id="sprite-canvas"
+      style="
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 140px;
+        pointer-events: none;
+        z-index: 999;
+      "
+      aria-hidden="true"
+    ></canvas>
     <script src="./sprite-walker.js"></script>
-</body>
+  </body>
 </html>
