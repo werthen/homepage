@@ -18,10 +18,21 @@
     <style>
       /* Theme: Warm Paper & Botanicals variables */
       :root {
+        /* Light theme (defaults) */
         --bg: #f7f5ef;
         --paper: #fffdf8;
         --accent: #2a6b2a;
         --muted: #7b8b76;
+        --text: #1f2d1f; /* primary copy color */
+        --text-muted: #6b7b6b;
+        --btn-bg-top: #eef7ec;
+        --btn-bg-bottom: #e6f1e1;
+        --btn-text: #1f3b1f;
+        --btn-primary-top: #e6f1e1;
+        --btn-primary-bottom: #dff0d9;
+        --btn-primary-text: var(--text);
+        --youtube-bg-top: rgba(230, 240, 230, 0.6);
+        --youtube-bg-bottom: rgba(245, 248, 245, 0.6);
         --card-shadow: 0 12px 34px rgba(20, 30, 20, 0.06);
         --card-border: rgba(32, 42, 32, 0.06);
         --grain-opacity: 0.55;
@@ -35,13 +46,23 @@
       /* Dark mode overrides when .dark-mode is present on body */
       body.dark-mode {
         /* Warm, botanical dark palette */
-        --bg: #09100c; /* near-black with green/wood undertone */
+        --bg: #09110c; /* near-black with green/wood undertone */
         --paper: #0f1913; /* slightly lighter card surface */
         --accent: #6fb06a; /* muted sage for accents */
         --muted: #9bb29a; /* lighter muted green for secondary text */
+        --text: #e6f2e6; /* soft off-white for primary copy */
+        --text-muted: #9bb29a;
+        --btn-bg-top: rgba(18, 28, 20, 0.6);
+        --btn-bg-bottom: rgba(12, 18, 14, 0.6);
+        --btn-text: #e6f2e6;
+        --btn-primary-top: #11301b;
+        --btn-primary-bottom: #0b2214;
+        --btn-primary-text: #eaf7ea;
+        --youtube-bg-top: rgba(18, 28, 20, 0.6);
+        --youtube-bg-bottom: rgba(12, 18, 14, 0.6);
         --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         --card-border: rgba(255, 255, 255, 0.03);
-        color: #e6f2e6; /* soft off-white */
+        color: var(--text);
       }
 
       /* Smooth transitions for theme changes */
@@ -72,8 +93,9 @@
           Roboto, "Helvetica Neue", Arial;
         margin: 0;
         padding: 28px;
-        background: linear-gradient(180deg, var(--bg) 0%, #f1efe6 100%);
-        color: #1f2d1f;
+        /* use paper as the gradient end so dark-mode keeps a dark gradient */
+        background: linear-gradient(180deg, var(--bg) 0%, var(--paper) 100%);
+        color: var(--text);
         min-height: 100vh;
         display: flex;
         flex-direction: column;
@@ -147,8 +169,12 @@
         margin-top: 10px;
       }
       .pomodoro .icon-btn {
-        background: linear-gradient(180deg, #eef7ec, #e6f1e1);
-        color: #1f3b1f;
+        background: linear-gradient(
+          180deg,
+          var(--btn-bg-top),
+          var(--btn-bg-bottom)
+        );
+        color: var(--btn-text);
         border: 1px solid rgba(30, 50, 30, 0.08);
         box-shadow: 0 2px 6px rgba(28, 38, 28, 0.04);
       }
@@ -157,11 +183,11 @@
         box-shadow: 0 6px 14px rgba(28, 38, 28, 0.06);
       }
       .pomodoro .icon-btn i {
-        color: #1f3b1f;
+        color: var(--btn-text);
       }
       .pomodoro-timer.editable-duration {
         background: transparent;
-        color: #16321a;
+        color: var(--text);
         border-bottom: 1px dashed rgba(22, 50, 22, 0.08);
         padding-bottom: 6px;
         position: relative;
@@ -189,7 +215,7 @@
         align-items: center;
         justify-content: center;
         position: relative;
-        color: #16321a;
+        color: var(--text);
       }
       .digit {
         position: relative;
@@ -214,7 +240,7 @@
         font-family: "Merriweather", serif;
         font-size: 1.05rem;
         opacity: 0.85;
-        color: #2b3a2b;
+        color: var(--text-muted);
       }
       /* hide seconds when the clock has .no-seconds */
       .clock-display.no-seconds #s1,
@@ -227,7 +253,7 @@
         font-size: 2.4rem;
         font-weight: 700;
         margin-bottom: 16px;
-        color: #183218;
+        color: var(--text);
       }
       .pomodoro-controls button {
         padding: 6px;
@@ -255,12 +281,12 @@
         margin-left: 6px;
         border-radius: 4px;
         background: transparent;
-        color: #16321a;
+        color: var(--text);
         text-align: center;
         outline: none;
         cursor: text;
         user-select: text;
-        caret-color: #16321a;
+        caret-color: var(--text);
         font-family: "Roboto Mono", monospace;
         border-bottom: 1px dotted rgba(22, 50, 22, 0.06);
       }
@@ -272,9 +298,9 @@
         cursor: default;
       }
       .icon-btn {
-        background: rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.06);
         border: none;
-        color: white;
+        color: var(--btn-text);
         padding: 10px;
         border-radius: 12px;
         cursor: pointer;
@@ -287,7 +313,7 @@
       .icon-btn svg {
         width: 20px;
         height: 20px;
-        fill: white;
+        fill: currentColor;
       }
       .weather-info {
         text-align: center;
@@ -295,12 +321,12 @@
       .weather-temp {
         font-size: 5rem;
         font-weight: 700;
-        color: #18421a;
+        color: var(--text);
       }
       .weather-desc {
         font-size: 2rem;
         opacity: 0.85;
-        color: #304030;
+        color: var(--text-muted);
       }
       .youtube-wrapper {
         position: relative;
@@ -309,8 +335,8 @@
         border-radius: 10px;
         background: linear-gradient(
           180deg,
-          rgba(230, 240, 230, 0.6),
-          rgba(245, 248, 245, 0.6)
+          var(--youtube-bg-top),
+          var(--youtube-bg-bottom)
         );
         border: 1px solid rgba(32, 42, 32, 0.04);
       }
@@ -330,7 +356,7 @@
         font-family: "Merriweather", serif;
         font-size: 1.25rem;
         font-weight: 400;
-        color: #2a3a2a;
+        color: var(--text);
         opacity: 0.95;
       }
       .greeting [contenteditable] {
@@ -354,13 +380,17 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(180deg, #f6faf4, #eef7ec);
+        background: linear-gradient(
+          180deg,
+          var(--btn-bg-top),
+          var(--btn-bg-bottom)
+        );
         border: 1px solid rgba(30, 45, 30, 0.06);
         cursor: pointer;
         box-shadow: 0 6px 12px rgba(8, 12, 8, 0.04);
       }
       .settings-cog i {
-        color: #16321a;
+        color: var(--btn-text);
         font-size: 18px;
       }
 
@@ -375,7 +405,8 @@
         z-index: 1200;
       }
       .settings-modal {
-        background: #fffef8;
+        background: var(--paper);
+        color: var(--text);
         border-radius: 10px;
         padding: 18px;
         width: 420px;
@@ -394,7 +425,7 @@
         display: block;
         font-size: 0.9rem;
         margin-bottom: 6px;
-        color: #2b3a2b;
+        color: var(--text);
       }
       .settings-row input[type="text"] {
         width: 100%;
@@ -416,10 +447,16 @@
       .btn-ghost {
         background: transparent;
         border: 1px solid rgba(30, 40, 30, 0.06);
+        color: var(--text);
       }
       .btn-primary {
-        background: linear-gradient(180deg, #e6f1e1, #dff0d9);
+        background: linear-gradient(
+          180deg,
+          var(--btn-primary-top),
+          var(--btn-primary-bottom)
+        );
         border: 1px solid rgba(22, 50, 22, 0.08);
+        color: var(--btn-primary-text);
       }
       @media (max-width: 768px) {
         .container {
@@ -550,7 +587,7 @@
         max-width: 360px;
         padding: 0;
         font-family: "Merriweather", serif;
-        color: #16321a;
+        color: var(--text);
         opacity: 0.98;
         transition: transform 0.12s ease, opacity 0.12s ease;
         background: transparent;
@@ -576,7 +613,7 @@
       .quote-rotator .author {
         font-size: 0.82rem;
         margin-top: 6px;
-        color: #2b3a2b;
+        color: var(--text-muted);
         font-family: "Source Sans 3", sans-serif;
       }
       .quote-rotator:hover {
