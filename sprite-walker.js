@@ -20,6 +20,8 @@
     var walkers = [];
     var FRAME_DURATION = 120;
     var lastTime = 0;
+    var running = false;
+    var resizeRaf = null;
     // Performance knobs
     var lowPower = !!window._lowPower || (navigator.connection && navigator.connection.saveData) || (navigator.deviceMemory && navigator.deviceMemory < 2);
     var MAX_SPRITE_FPS = lowPower ? 20 : 60; // cap sprite loop FPS
@@ -156,22 +158,41 @@
         });
     }
 
+    function scheduleResize() {
+        if (resizeRaf) return;
+        resizeRaf = requestAnimationFrame(function(){
+            resizeRaf = null;
+            resizeCanvas();
+        });
+    }
+
     sheet.onload = function () {
         sheetW = sheet.naturalWidth; sheetH = sheet.naturalHeight;
         frameW = Math.floor(sheetW / COLS); frameH = Math.floor(sheetH / ROWS);
         canvas.style.height = Math.min(160, frameH + 20) + 'px';
         resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('resize', scheduleResize);
         // create a smaller number of walkers on low-power devices
         if (walkers.length === 0) {
             addWalker({ x: 40, scale: 0.6, offsetY: 0 });
             if (!lowPower) addWalker({ x: 220, scale: 0.6, offsetY: 0 });
         }
-        lastTime = performance.now();
-        requestAnimationFrame(loop);
+        startLoop();
     };
 
+    function startLoop() {
+        if (running) return;
+        running = true;
+        lastTime = performance.now();
+        requestAnimationFrame(loop);
+    }
+
+    function stopLoop() {
+        running = false;
+    }
+
     function loop(now) {
+        if (!running) return;
         var dt = now - lastTime;
         if (dt >= SPRITE_FRAME_PERIOD) {
             var step = Math.min(200, dt);
@@ -180,6 +201,7 @@
             render();
         }
         if (!document.hidden) requestAnimationFrame(loop);
+        else stopLoop();
     }
 
     function update(dt) { walkers.forEach(function(w){ w.update(dt); }); }
@@ -203,5 +225,9 @@
         setGlobalScale: function(s){ walkers.forEach(function(w){ w.userScale = Math.max(0.2, Math.min(2, s)); }); resizeCanvas(); },
         getWalkers: function(){ return walkers; }
     };
+
+    document.addEventListener('visibilitychange', function(){
+        if (!document.hidden) startLoop();
+    });
 
 })();

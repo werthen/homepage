@@ -225,12 +225,31 @@
         overflow: hidden;
         text-align: center;
         line-height: 1.05em;
+        contain: layout paint;
       }
-      .anim-digit {
-        display: block;
+      .digit-layer {
+        position: absolute;
+        left: 0;
+        top: 0;
         width: 100%;
-        transition: transform 110ms cubic-bezier(0.2, 0.9, 0.2, 1);
+        display: block;
+        transition: none;
         will-change: transform;
+      }
+      .digit.is-animating .digit-layer {
+        transition: transform 0.18s ease;
+      }
+      .digit-current {
+        transform: translateY(0);
+      }
+      .digit-next {
+        transform: translateY(100%);
+      }
+      .digit.is-animating .digit-current {
+        transform: translateY(-100%);
+      }
+      .digit.is-animating .digit-next {
+        transform: translateY(0);
       }
       .colon {
         display: inline-block;
@@ -825,12 +844,164 @@
           w.classList.add("is-active");
         }
 
+        var reduceMotionQuery =
+          window.matchMedia &&
+          window.matchMedia("(prefers-reduced-motion: reduce)");
+        var prefersReducedMotion = reduceMotionQuery
+          ? reduceMotionQuery.matches
+          : false;
+        if (reduceMotionQuery && reduceMotionQuery.addEventListener) {
+          reduceMotionQuery.addEventListener("change", function (e) {
+            prefersReducedMotion = e.matches;
+          });
+        } else if (reduceMotionQuery && reduceMotionQuery.addListener) {
+          reduceMotionQuery.addListener(function (e) {
+            prefersReducedMotion = e.matches;
+          });
+        }
+
+        var rafId = null;
+        var MAX_TILT = 12;
+
+        function lerp(a, b, t) {
+          return a + (b - a) * t;
+        }
+
+        function applyTransform(el, c, wigX, wigY) {
+          wigX = wigX || 0;
+          wigY = wigY || 0;
+          var transform =
+            "perspective(800px) translate3d(" +
+            wigX +
+            "px," +
+            wigY +
+            "px," +
+            c.tz +
+            "px) rotateX(" +
+            c.rx +
+            "deg) rotateY(" +
+            c.ry +
+            "deg) scale(" +
+            c.scale +
+            ")";
+          el.style.transform = transform;
+        }
+
+        function updateTargetFromPointer(w) {
+          var t = w._tilt;
+          if (!t || !t.hasPending) return;
+          if (t.rectDirty || !t.rect) {
+            t.rect = w.getBoundingClientRect();
+            t.rectDirty = false;
+          }
+          var rect = t.rect;
+          var px = (t.pendingX - rect.left) / rect.width;
+          var py = (t.pendingY - rect.top) / rect.height;
+          var dx = (px - 0.5) * 2;
+          var dy = (py - 0.5) * 2;
+          var rx = -dy * MAX_TILT;
+          var ry = dx * MAX_TILT;
+          var tz = Math.max(
+            6,
+            Math.min(18, (1 - (Math.abs(dx) + Math.abs(dy)) / 2) * 18)
+          );
+          t.target.rx = rx;
+          t.target.ry = ry;
+          t.target.tz = tz;
+          t.target.scale = 1.02;
+          t.hasPending = false;
+        }
+
+        function ensureRaf() {
+          if (!rafId) rafId = requestAnimationFrame(tickAll);
+        }
+
+        function tickAll(now) {
+          rafId = null;
+          var anyActive = false;
+          var wiggleEnabledGlobal =
+            !document.body.classList.contains("wiggle-disabled") &&
+            !prefersReducedMotion;
+          var nowSec = now / 1000;
+
+          widgets.forEach(function (w) {
+            var t = w._tilt;
+            if (!t) return;
+            var tiltEnabled = !document.body.classList.contains("tilt-disabled");
+            var isActive = w.classList.contains("is-active") && tiltEnabled;
+
+            if (isActive) updateTargetFromPointer(w);
+            else t.hasPending = false;
+
+            var cur = t.current;
+            var tar = t.target;
+            var near =
+              Math.abs(cur.rx - tar.rx) < 0.05 &&
+              Math.abs(cur.ry - tar.ry) < 0.05 &&
+              Math.abs(cur.tz - tar.tz) < 0.5 &&
+              Math.abs(cur.scale - tar.scale) < 0.005;
+
+            if (near && !isActive && !wiggleEnabledGlobal) {
+              if (t._hadTransform) {
+                w.style.transform = "";
+                t._hadTransform = false;
+              }
+              return;
+            }
+
+            var smooth = 0.16;
+            cur.rx = lerp(cur.rx, tar.rx, smooth);
+            cur.ry = lerp(cur.ry, tar.ry, smooth);
+            cur.tz = lerp(cur.tz, tar.tz, 0.12);
+            cur.scale = lerp(cur.scale, tar.scale, 0.08);
+
+            var wigX = 0,
+              wigY = 0;
+            if (wiggleEnabledGlobal) {
+              var s = w._wiggle;
+              var phase = s.phase + nowSec * s.speed;
+              var inten =
+                typeof window._wiggleIntensity === "number"
+                  ? window._wiggleIntensity
+                  : 1.0;
+              wigX = Math.sin(phase) * s.ampX * inten;
+              wigY = Math.cos(phase * 0.92) * s.ampY * inten;
+            }
+
+            applyTransform(w, cur, wigX, wigY);
+            t._hadTransform = true;
+            anyActive = true;
+          });
+
+          if (anyActive) rafId = requestAnimationFrame(tickAll);
+        }
+
+        function markAllRectsDirty() {
+          widgets.forEach(function (w) {
+            if (w._tilt) w._tilt.rectDirty = true;
+          });
+        }
+
+        window.addEventListener("resize", markAllRectsDirty, { passive: true });
+        window.addEventListener("scroll", markAllRectsDirty, { passive: true });
+        var scrollArea = document.querySelector(".page-blur-root");
+        if (scrollArea)
+          scrollArea.addEventListener("scroll", markAllRectsDirty, {
+            passive: true,
+          });
+
         widgets.forEach(function (w) {
           // per-widget tilt state
           w._tilt = {
             target: { rx: 0, ry: 0, tz: 0, scale: 1 },
             current: { rx: 0, ry: 0, tz: 0, scale: 1 },
             raf: null,
+            rect: null,
+            rectDirty: true,
+            pendingX: 0,
+            pendingY: 0,
+            hasPending: false,
+            _hadTransform: false,
           };
 
           // per-widget wiggle state (autonomous subtle motion)
@@ -844,118 +1015,38 @@
           // global intensity (1.0 default) applied multiplicatively to wiggle amps
           window._wiggleIntensity = window._wiggleIntensity || 1.0;
 
-          function lerp(a, b, t) {
-            return a + (b - a) * t;
-          }
-
-          function applyTransform(c, wigX, wigY) {
-            // apply inline transform using numeric units; wigX/wigY are pixel offsets
-            wigX = wigX || 0;
-            wigY = wigY || 0;
-            var transform =
-              "perspective(800px) translate3d(" +
-              wigX.toFixed(2) +
-              "px," +
-              wigY.toFixed(2) +
-              "px," +
-              c.tz.toFixed(2) +
-              "px) rotateX(" +
-              c.rx.toFixed(2) +
-              "deg) rotateY(" +
-              c.ry.toFixed(2) +
-              "deg) scale(" +
-              c.scale.toFixed(3) +
-              ")";
-            w.style.transform = transform;
-          }
-
-          function tick() {
-            var t = 0.16; // smoothing
-            var cur = w._tilt.current;
-            var tar = w._tilt.target;
-            cur.rx = lerp(cur.rx, tar.rx, t);
-            cur.ry = lerp(cur.ry, tar.ry, t);
-            cur.tz = lerp(cur.tz, tar.tz, 0.12);
-            cur.scale = lerp(cur.scale, tar.scale, 0.08);
-
-            // compute wiggle offsets if enabled and user doesn't prefer reduced motion
-            var wiggleEnabled =
-              !document.body.classList.contains("wiggle-disabled") &&
-              !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-            var wigX = 0,
-              wigY = 0;
-            if (wiggleEnabled) {
-              var s = w._wiggle;
-              var now = performance.now() / 1000;
-              var phase = s.phase + now * s.speed;
-              var inten =
-                typeof window._wiggleIntensity === "number"
-                  ? window._wiggleIntensity
-                  : 1.0;
-              // apply intensity multiplier
-              wigX = Math.sin(phase) * s.ampX * inten;
-              wigY = Math.cos(phase * 0.92) * s.ampY * inten;
-            }
-
-            applyTransform(cur, wigX, wigY);
-
-            // stop RAF only if we're near the tilt target and wiggle is disabled
-            var near =
-              Math.abs(cur.rx - tar.rx) < 0.05 &&
-              Math.abs(cur.ry - tar.ry) < 0.05 &&
-              Math.abs(cur.tz - tar.tz) < 0.5 &&
-              Math.abs(cur.scale - tar.scale) < 0.005;
-            if (near && !w.classList.contains("is-active") && !wiggleEnabled) {
-              w._tilt.raf = null;
-              // final reset
-              w.style.transform = "";
-              return;
-            }
-            w._tilt.raf = requestAnimationFrame(tick);
-          }
-
-          function startLoop() {
-            if (!w._tilt.raf) w._tilt.raf = requestAnimationFrame(tick);
-          }
-          // expose start helper so external callers (like settings) can start the widget's RAF loop
-          w._tilt.start = startLoop;
+          // expose start helper so external callers (like settings) can start the RAF loop
+          w._tilt.start = ensureRaf;
 
           // pointer handlers
           w.addEventListener("pointerenter", function () {
             setActive(w);
-            if (!document.body.classList.contains("tilt-disabled")) startLoop();
+            w._tilt.rectDirty = true;
+            if (!document.body.classList.contains("tilt-disabled")) ensureRaf();
           });
           w.addEventListener("pointerleave", function () {
             w._tilt.target = { rx: 0, ry: 0, tz: 0, scale: 1 };
             clearActive();
           });
-          w.addEventListener("pointermove", function (e) {
-            if (!w.classList.contains("is-active")) return;
-            if (document.body.classList.contains("tilt-disabled")) return;
-            var rect = w.getBoundingClientRect();
-            var px = (e.clientX - rect.left) / rect.width;
-            var py = (e.clientY - rect.top) / rect.height;
-            var dx = (px - 0.5) * 2;
-            var dy = (py - 0.5) * 2;
-            var maxTilt = 12;
-            var rx = -dy * maxTilt;
-            var ry = dx * maxTilt;
-            var tz = Math.max(
-              6,
-              Math.min(18, (1 - (Math.abs(dx) + Math.abs(dy)) / 2) * 18)
-            );
-            w._tilt.target.rx = rx;
-            w._tilt.target.ry = ry;
-            w._tilt.target.tz = tz;
-            w._tilt.target.scale = 1.02;
-            startLoop();
-          });
+          w.addEventListener(
+            "pointermove",
+            function (e) {
+              if (!w.classList.contains("is-active")) return;
+              if (document.body.classList.contains("tilt-disabled")) return;
+              w._tilt.pendingX = e.clientX;
+              w._tilt.pendingY = e.clientY;
+              w._tilt.hasPending = true;
+              ensureRaf();
+            },
+            { passive: true }
+          );
 
           // keyboard accessibility
           if (!w.hasAttribute("tabindex")) w.setAttribute("tabindex", "0");
           w.addEventListener("focus", function () {
             setActive(w);
-            if (!document.body.classList.contains("tilt-disabled")) startLoop();
+            w._tilt.rectDirty = true;
+            if (!document.body.classList.contains("tilt-disabled")) ensureRaf();
           });
           w.addEventListener("blur", function () {
             w._tilt.target = { rx: 0, ry: 0, tz: 0, scale: 1 };
@@ -979,9 +1070,13 @@
         };
 
         // Also remove the class if the user clicks outside any widget (safety)
-        document.addEventListener("pointerdown", function (e) {
-          if (!e.target.closest || !e.target.closest(".widget")) clearActive();
-        });
+        document.addEventListener(
+          "pointerdown",
+          function (e) {
+            if (!e.target.closest || !e.target.closest(".widget")) clearActive();
+          },
+          { passive: true }
+        );
       })();
       // Clock
       function getWeekNumber(date) {
@@ -996,6 +1091,50 @@
 
       let previousDigits = ["0", "0", ":", "0", "0", ":", "0", "0"];
       let firstUpdate = true;
+      let lastDateKey = null;
+      let lastGreetingPrefix = null;
+
+      const digitIds = [
+        "h1",
+        "h2",
+        "colon1",
+        "m1",
+        "m2",
+        "colon2",
+        "s1",
+        "s2",
+      ];
+      const digitElements = digitIds.map((id) => document.getElementById(id));
+      const digitStates = new Map();
+      const dateEl = document.getElementById("date");
+      const greetingEl = document.getElementById("greeting");
+      const nameSpan = document.getElementById("greeting-name");
+
+      function initDigit(el) {
+        if (!el || !el.classList.contains("digit")) return;
+        const current = document.createElement("span");
+        current.className = "digit-layer digit-current";
+        current.textContent = el.textContent || "0";
+        const next = document.createElement("span");
+        next.className = "digit-layer digit-next";
+        next.textContent = current.textContent;
+        el.textContent = "";
+        el.appendChild(current);
+        el.appendChild(next);
+        const state = { current, next, pending: null };
+        digitStates.set(el, state);
+        el.addEventListener("transitionend", (e) => {
+          if (e.target !== current) return;
+          if (!el.classList.contains("is-animating")) return;
+          if (state.pending === null) return;
+          state.current.textContent = state.pending;
+          state.next.textContent = state.pending;
+          state.pending = null;
+          el.classList.remove("is-animating");
+        });
+      }
+
+      digitElements.forEach(initDigit);
 
       function updateClock() {
         const now = new Date();
@@ -1005,16 +1144,19 @@
         const ss = String(now.getSeconds()).padStart(2, "0");
         const newDigits = [hh[0], hh[1], ":", mm[0], mm[1], ":", ss[0], ss[1]];
 
-        const date = now.toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
-        const weekNum = getWeekNumber(now);
-        document.getElementById(
-          "date"
-        ).textContent = `${date} - Week ${weekNum}`;
+        const dateKey =
+          now.getFullYear() + "-" + now.getMonth() + "-" + now.getDate();
+        if (dateKey !== lastDateKey && dateEl) {
+          const date = now.toLocaleDateString("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          });
+          const weekNum = getWeekNumber(now);
+          dateEl.textContent = `${date} - Week ${weekNum}`;
+          lastDateKey = dateKey;
+        }
 
         // Update greeting prefix but preserve the editable name span
         const hour = now.getHours();
@@ -1025,97 +1167,41 @@
         else if (hour < 22) prefix += "evening";
         else prefix += "night";
         // find greeting container and update only the prefix text node
-        const greetingEl = document.getElementById("greeting");
-        const nameSpan = document.getElementById("greeting-name");
         if (greetingEl) {
           // If the first child is a text node containing the prefix, update it; otherwise reconstruct safely
           const first = greetingEl.firstChild;
           const desired = `${prefix}, `;
-          if (first && first.nodeType === Node.TEXT_NODE)
-            first.textContent = desired;
-          else {
-            // clear and re-append
-            greetingEl.innerHTML = "";
-            greetingEl.appendChild(document.createTextNode(desired));
-            if (nameSpan) greetingEl.appendChild(nameSpan);
+          if (desired !== lastGreetingPrefix) {
+            if (first && first.nodeType === Node.TEXT_NODE)
+              first.textContent = desired;
+            else {
+              // clear and re-append
+              greetingEl.innerHTML = "";
+              greetingEl.appendChild(document.createTextNode(desired));
+              if (nameSpan) greetingEl.appendChild(nameSpan);
+            }
+            lastGreetingPrefix = desired;
           }
         }
 
         // Animate changing digits (fixed sequencing: old slides up, then new slides in from below)
-        const digitIds = [
-          "h1",
-          "h2",
-          "colon1",
-          "m1",
-          "m2",
-          "colon2",
-          "s1",
-          "s2",
-        ];
         for (let i = 0; i < newDigits.length; i++) {
-          const id = digitIds[i];
-          const digitElement = document.getElementById(id);
-          if (newDigits[i] !== previousDigits[i] && !firstUpdate) {
-            // Create old and new spans (sequential animation)
-            const oldSpan = document.createElement("span");
-            oldSpan.className = "anim-digit";
-            oldSpan.textContent = previousDigits[i];
-            oldSpan.style.position = "absolute";
-            oldSpan.style.left = "0";
-            oldSpan.style.top = "0";
-            oldSpan.style.width = "100%";
-            oldSpan.style.display = "inline-block";
-            oldSpan.style.transform = "translateY(0)";
-            oldSpan.style.transition = "transform 0.18s ease";
-            oldSpan.style.zIndex = "2";
-
-            const newSpan = document.createElement("span");
-            newSpan.className = "anim-digit";
-            newSpan.textContent = newDigits[i];
-            newSpan.style.position = "absolute";
-            newSpan.style.left = "0";
-            newSpan.style.top = "0";
-            newSpan.style.width = "100%";
-            newSpan.style.display = "inline-block";
-            newSpan.style.transform = "translateY(100%)";
-            newSpan.style.transition = "transform 0.18s ease";
-            newSpan.style.visibility = "hidden";
-            newSpan.style.zIndex = "1";
-
-            // Preserve container height to avoid layout jumps
-            const containerHeight = digitElement.offsetHeight + "px";
-            digitElement.style.height = containerHeight;
-            digitElement.style.lineHeight = containerHeight;
-
-            // Clear container and append spans
-            digitElement.innerHTML = "";
-            digitElement.appendChild(oldSpan);
-            digitElement.appendChild(newSpan);
-
-            // Force layout
-            void oldSpan.offsetWidth;
-
-            // Make sure new span is visible and positioned below, then animate both simultaneously
-            newSpan.style.visibility = "visible";
-            newSpan.style.transform = "translateY(100%)";
-            // force layout for newSpan
-            void newSpan.offsetWidth;
-
-            // Animate: old slides up, new slides into place
-            oldSpan.style.transform = "translateY(-100%)";
-            newSpan.style.transform = "translateY(0)";
-
-            // After animation completes, set final text and clean up
-            setTimeout(() => {
-              digitElement.innerHTML = newDigits[i];
-              digitElement.style.position = "";
-              digitElement.style.overflow = "";
-              digitElement.style.width = "";
-              digitElement.style.height = "";
-              digitElement.style.lineHeight = "";
-            }, 220);
-          } else {
+          const digitElement = digitElements[i];
+          if (!digitElement) continue;
+          const state = digitStates.get(digitElement);
+          if (!state || !digitElement.classList.contains("digit")) {
             digitElement.textContent = newDigits[i];
+            continue;
+          }
+          if (newDigits[i] !== previousDigits[i] && !firstUpdate) {
+            state.next.textContent = newDigits[i];
+            state.pending = newDigits[i];
+            digitElement.classList.add("is-animating");
+          } else {
+            state.current.textContent = newDigits[i];
+            state.next.textContent = newDigits[i];
+            state.pending = null;
+            digitElement.classList.remove("is-animating");
           }
         }
         previousDigits = [...newDigits];
@@ -1768,6 +1854,10 @@
 
         container.addEventListener("mouseenter", stop);
         container.addEventListener("mouseleave", start);
+        document.addEventListener("visibilitychange", () => {
+          if (document.hidden) stop();
+          else start();
+        });
 
         // expose for debugging if needed
         window._quoteRotator = { start, stop, next, render };
