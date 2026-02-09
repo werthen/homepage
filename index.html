@@ -271,8 +271,24 @@
         font-family: "Merriweather", serif;
         font-size: 2.4rem;
         font-weight: 700;
-        margin-bottom: 16px;
+        margin-bottom: 8px;
         color: var(--text);
+      }
+      .work-delta {
+        font-family: "Roboto Mono", monospace;
+        font-size: 1.05rem;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+      }
+      .work-target-row {
+        font-family: "Merriweather", serif;
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+      }
+      .work-target-row .editable-duration {
+        margin-left: 4px;
+        min-width: 64px;
       }
       .pomodoro-controls button {
         padding: 6px;
@@ -771,13 +787,18 @@
           <div class="date-display" id="date">Monday, October 28, 2025</div>
         </div>
         <div class="widget pomodoro">
-          <div
-            class="pomodoro-timer editable-duration"
-            id="timer"
-            contenteditable="true"
-            tabindex="0"
-          >
-            25:00
+          <div class="pomodoro-timer" id="work-elapsed">00:00:00</div>
+          <div class="work-delta" id="work-delta">Remaining 7:30:00</div>
+          <div class="work-target-row">
+            Target
+            <span
+              class="editable-duration"
+              id="work-target"
+              contenteditable="true"
+              tabindex="0"
+            >
+              7:30
+            </span>
           </div>
           <div class="pomodoro-controls">
             <button id="toggle" class="icon-btn" title="Start/Pause">
@@ -787,7 +808,6 @@
               <i class="fa-solid fa-rotate-right"></i>
             </button>
           </div>
-          <div id="status">Work Session</div>
         </div>
         <div class="widget weather">
           <div class="weather-info" id="weather-info">
@@ -1210,132 +1230,161 @@
       setInterval(updateClock, 1000);
       updateClock();
 
-      // Pomodoro Timer
-      let timerInterval;
-      let workDuration = 25 * 60;
-      let breakDuration = 5 * 60;
-      let timeLeft = workDuration; // in seconds
-      let isWork = true;
+      // Work Tracker Timer
+      let timerInterval = null;
+      let elapsedSeconds = 0;
+      let lastTickMs = null;
       let isRunning = false;
+      let targetSeconds = 7 * 3600 + 30 * 60;
 
-      function updateTimerDisplay() {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        document.getElementById("timer").textContent = `${minutes
-          .toString()
-          .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-      }
-
-      function startTimer() {
-        if (!isRunning) {
-          isRunning = true;
-          // disable inline editing while running
-          const tEl = document.getElementById("timer");
-          if (tEl) {
-            tEl.setAttribute("contenteditable", "false");
-            tEl.classList.add("disabled");
-          }
-          timerInterval = setInterval(() => {
-            timeLeft--;
-            updateTimerDisplay();
-            if (timeLeft <= 0) {
-              clearInterval(timerInterval);
-              isRunning = false;
-              if (isWork) {
-                timeLeft = breakDuration; // break
-                isWork = false;
-                document.getElementById("status").textContent = "Break Time";
-              } else {
-                timeLeft = workDuration; // back to work
-                isWork = true;
-                document.getElementById("status").textContent = "Work Session";
-              }
-              updateTimerDisplay();
-              alert(
-                isWork
-                  ? "Break time over! Back to work."
-                  : "Work session complete! Take a break."
-              );
-            }
-          }, 1000);
-        }
-      }
-
-      function pauseTimer() {
-        clearInterval(timerInterval);
-        isRunning = false;
-        // re-enable inline editing while paused
-        const tElPause = document.getElementById("timer");
-        if (tElPause) {
-          tElPause.setAttribute("contenteditable", "true");
-          tElPause.classList.remove("disabled");
-        }
-      }
-
-      function resetTimer() {
-        clearInterval(timerInterval);
-        isRunning = false;
-        timeLeft = workDuration;
-        isWork = true;
-        document.getElementById("status").textContent = "Work Session";
-        updateTimerDisplay();
-        const tElReset = document.getElementById("timer");
-        if (tElReset) {
-          tElReset.setAttribute("contenteditable", "true");
-          tElReset.classList.remove("disabled");
-        }
-      }
-      // wire new controls
+      const LS_WORK_TARGET = "work_target_seconds";
+      const elapsedEl = document.getElementById("work-elapsed");
+      const deltaEl = document.getElementById("work-delta");
+      const targetEl = document.getElementById("work-target");
       const toggleBtn = document.getElementById("toggle");
       const toggleIcon = document.getElementById("toggle-icon");
       const resetBtn = document.getElementById("reset");
 
-      function updateToggleIcon() {
-        if (isRunning) {
-          toggleIcon.className = "fa-solid fa-pause";
-        } else {
-          toggleIcon.className = "fa-solid fa-play";
-        }
+      function formatHMS(totalSeconds) {
+        const s = Math.max(0, Math.floor(totalSeconds));
+        const h = Math.floor(s / 3600);
+        const m = Math.floor((s % 3600) / 60);
+        const sec = s % 60;
+        return `${String(h).padStart(2, "0")}:${String(m).padStart(
+          2,
+          "0"
+        )}:${String(sec).padStart(2, "0")}`;
       }
 
-      function parseTimerTextToSeconds(text) {
+      function formatHM(totalSeconds) {
+        const s = Math.max(0, Math.floor(totalSeconds));
+        const h = Math.floor(s / 3600);
+        const m = Math.floor((s % 3600) / 60);
+        return `${h}:${String(m).padStart(2, "0")}`;
+      }
+
+      function parseTargetToSeconds(text) {
         if (!text) return null;
-        const t = text.trim();
-        // accept MM:SS or M:SS or MM
-        const parts = t.split(":");
-        if (parts.length === 1) {
-          const m = parseInt(parts[0].replace(/[^0-9]/g, ""), 10);
-          if (isNaN(m)) return null;
-          return m * 60;
+        const t = text.trim().toLowerCase();
+        if (!t) return null;
+        if (t.includes(":")) {
+          const parts = t.split(":");
+          const h = parseInt(parts[0].replace(/[^0-9]/g, ""), 10);
+          const m = parseInt(parts[1].replace(/[^0-9]/g, ""), 10);
+          const s =
+            parts.length > 2
+              ? parseInt(parts[2].replace(/[^0-9]/g, ""), 10)
+              : 0;
+          if (isNaN(h) || isNaN(m) || isNaN(s)) return null;
+          return h * 3600 + m * 60 + s;
         }
-        if (parts.length === 2) {
-          const m = parseInt(parts[0].replace(/[^0-9]/g, ""), 10);
-          const s = parseInt(parts[1].replace(/[^0-9]/g, ""), 10);
-          if (isNaN(m) || isNaN(s)) return null;
-          return m * 60 + Math.max(0, Math.min(59, s));
+        let hours = 0;
+        let minutes = 0;
+        let seconds = 0;
+        let matched = false;
+        const hMatch = t.match(/(\d+(?:\.\d+)?)\s*h/);
+        if (hMatch) {
+          hours = parseFloat(hMatch[1]);
+          matched = true;
         }
+        const mMatch = t.match(/(\d+(?:\.\d+)?)\s*m/);
+        if (mMatch) {
+          minutes = parseFloat(mMatch[1]);
+          matched = true;
+        }
+        const sMatch = t.match(/(\d+(?:\.\d+)?)\s*s/);
+        if (sMatch) {
+          seconds = parseFloat(sMatch[1]);
+          matched = true;
+        }
+        if (matched)
+          return Math.round(hours * 3600 + minutes * 60 + seconds);
+        const num = parseFloat(t.replace(/[^0-9.]/g, ""));
+        if (!isNaN(num)) return Math.round(num * 3600);
         return null;
       }
 
-      const timerEl = document.getElementById("timer");
-      if (timerEl) {
-        timerEl.addEventListener("focus", (ev) => {
-          // don't allow entering edit mode while running
-          if (isRunning) {
-            ev.target.blur();
-            return;
-          }
-          // select all
+      function updateDelta() {
+        if (!deltaEl) return;
+        const diff = targetSeconds - elapsedSeconds;
+        if (diff >= 0) deltaEl.textContent = `Remaining ${formatHMS(diff)}`;
+        else deltaEl.textContent = `Over ${formatHMS(-diff)}`;
+      }
+
+      function updateElapsedDisplay() {
+        if (elapsedEl) elapsedEl.textContent = formatHMS(elapsedSeconds);
+        updateDelta();
+      }
+
+      function tick() {
+        const now = Date.now();
+        if (lastTickMs === null) {
+          lastTickMs = now;
+          return;
+        }
+        const diff = Math.floor((now - lastTickMs) / 1000);
+        if (diff > 0) {
+          elapsedSeconds += diff;
+          lastTickMs += diff * 1000;
+          updateElapsedDisplay();
+        }
+      }
+
+      function startTimer() {
+        if (isRunning) return;
+        isRunning = true;
+        lastTickMs = Date.now();
+        timerInterval = setInterval(tick, 250);
+        updateToggleIcon();
+      }
+
+      function pauseTimer() {
+        if (!isRunning) return;
+        isRunning = false;
+        clearInterval(timerInterval);
+        timerInterval = null;
+        lastTickMs = null;
+        updateToggleIcon();
+      }
+
+      function resetTimer() {
+        pauseTimer();
+        elapsedSeconds = 0;
+        updateElapsedDisplay();
+      }
+
+      function updateToggleIcon() {
+        if (isRunning) toggleIcon.className = "fa-solid fa-pause";
+        else toggleIcon.className = "fa-solid fa-play";
+      }
+
+      function applyTargetFromInput() {
+        if (!targetEl) return;
+        const parsed = parseTargetToSeconds(targetEl.textContent || "");
+        if (parsed !== null && parsed >= 0) {
+          targetSeconds = parsed;
+          localStorage.setItem(LS_WORK_TARGET, String(targetSeconds));
+          targetEl.textContent = formatHM(targetSeconds);
+          updateDelta();
+        } else {
+          targetEl.textContent = formatHM(targetSeconds);
+        }
+      }
+
+      if (targetEl) {
+        const savedTarget = parseInt(
+          localStorage.getItem(LS_WORK_TARGET) || "",
+          10
+        );
+        if (!isNaN(savedTarget) && savedTarget >= 0) {
+          targetSeconds = savedTarget;
+        }
+        targetEl.textContent = formatHM(targetSeconds);
+
+        targetEl.addEventListener("focus", () => {
           document.execCommand("selectAll", false, null);
         });
-
-        timerEl.addEventListener("keydown", (e) => {
-          // if running, block all editing keys
-          if (isRunning) {
-            e.preventDefault();
-            return;
-          }
-          // allow digits, colon, backspace, delete, arrows, enter, tab
+        targetEl.addEventListener("keydown", (e) => {
           const allowed = [
             "Backspace",
             "Delete",
@@ -1346,49 +1395,34 @@
             "Enter",
             "Tab",
             ":",
+            "h",
+            "m",
+            "s",
+            "H",
+            "M",
+            "S",
+            ".",
+            " ",
           ];
+          if (e.key === "Enter") {
+            e.preventDefault();
+            targetEl.blur();
+            return;
+          }
           if (allowed.includes(e.key)) return;
           if (/^[0-9]$/.test(e.key)) return;
           e.preventDefault();
         });
-
-        timerEl.addEventListener("blur", () => {
-          const secs = parseTimerTextToSeconds(timerEl.textContent || "");
-          if (secs !== null) {
-            workDuration = secs;
-            timeLeft = secs;
-            updateTimerDisplay();
-          } else {
-            // revert to previous
-            updateTimerDisplay();
-          }
-        });
+        targetEl.addEventListener("blur", applyTargetFromInput);
       }
 
       toggleBtn.addEventListener("click", () => {
-        // if user edited timer, parse and apply before starting
-        const secs = parseTimerTextToSeconds(
-          timerEl ? timerEl.textContent || "" : ""
-        );
-        if (secs !== null) {
-          workDuration = secs;
-          // if not running, set current timeLeft to the edited value
-          if (!isRunning) timeLeft = secs;
-        }
         if (isRunning) pauseTimer();
         else startTimer();
-        updateToggleIcon();
       });
-
-      resetBtn.addEventListener("click", () => {
-        resetTimer();
-        updateToggleIcon();
-      });
-      // initialize icon
+      resetBtn.addEventListener("click", resetTimer);
       updateToggleIcon();
-      updateTimerDisplay();
-
-      // Editable durations handlers removed — timer is edited inline via the timer element
+      updateElapsedDisplay();
 
       // Weather
       async function fetchWeather() {
