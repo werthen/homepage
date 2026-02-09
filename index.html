@@ -1238,6 +1238,9 @@
       let targetSeconds = 7 * 3600 + 30 * 60;
 
       const LS_WORK_TARGET = "work_target_seconds";
+      const LS_WORK_ELAPSED = "work_elapsed_seconds";
+      const LS_WORK_RUNNING = "work_is_running";
+      const LS_WORK_LAST_START = "work_last_start_ms";
       const elapsedEl = document.getElementById("work-elapsed");
       const deltaEl = document.getElementById("work-delta");
       const targetEl = document.getElementById("work-target");
@@ -1311,6 +1314,18 @@
         else deltaEl.textContent = `Over ${formatHMS(-diff)}`;
       }
 
+      function persistState() {
+        try {
+          localStorage.setItem(LS_WORK_ELAPSED, String(elapsedSeconds));
+          localStorage.setItem(LS_WORK_RUNNING, isRunning ? "true" : "false");
+          if (isRunning && lastTickMs !== null) {
+            localStorage.setItem(LS_WORK_LAST_START, String(lastTickMs));
+          } else {
+            localStorage.removeItem(LS_WORK_LAST_START);
+          }
+        } catch (e) {}
+      }
+
       function updateElapsedDisplay() {
         if (elapsedEl) elapsedEl.textContent = formatHMS(elapsedSeconds);
         updateDelta();
@@ -1327,6 +1342,7 @@
           elapsedSeconds += diff;
           lastTickMs += diff * 1000;
           updateElapsedDisplay();
+          persistState();
         }
       }
 
@@ -1336,6 +1352,7 @@
         lastTickMs = Date.now();
         timerInterval = setInterval(tick, 250);
         updateToggleIcon();
+        persistState();
       }
 
       function pauseTimer() {
@@ -1345,12 +1362,14 @@
         timerInterval = null;
         lastTickMs = null;
         updateToggleIcon();
+        persistState();
       }
 
       function resetTimer() {
         pauseTimer();
         elapsedSeconds = 0;
         updateElapsedDisplay();
+        persistState();
       }
 
       function updateToggleIcon() {
@@ -1369,6 +1388,32 @@
         } else {
           targetEl.textContent = formatHM(targetSeconds);
         }
+      }
+
+      function restoreWorkState() {
+        const savedElapsed = parseInt(
+          localStorage.getItem(LS_WORK_ELAPSED) || "",
+          10
+        );
+        if (!isNaN(savedElapsed) && savedElapsed >= 0) {
+          elapsedSeconds = savedElapsed;
+        }
+        const savedRunning = localStorage.getItem(LS_WORK_RUNNING) === "true";
+        const lastStartMs = parseInt(
+          localStorage.getItem(LS_WORK_LAST_START) || "",
+          10
+        );
+        if (savedRunning) {
+          if (!isNaN(lastStartMs) && lastStartMs > 0) {
+            const diff = Math.floor((Date.now() - lastStartMs) / 1000);
+            if (diff > 0) elapsedSeconds += diff;
+          }
+          isRunning = false;
+          startTimer();
+        } else {
+          updateToggleIcon();
+        }
+        updateElapsedDisplay();
       }
 
       if (targetEl) {
@@ -1421,8 +1466,8 @@
         else startTimer();
       });
       resetBtn.addEventListener("click", resetTimer);
-      updateToggleIcon();
-      updateElapsedDisplay();
+      restoreWorkState();
+      window.addEventListener("beforeunload", persistState);
 
       // Weather
       async function fetchWeather() {
