@@ -290,6 +290,17 @@
         margin-left: 4px;
         min-width: 64px;
       }
+      .work-save-status {
+        font-family: "Roboto Mono", monospace;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        opacity: 0.75;
+        min-height: 1em;
+      }
+      .work-save-status.is-error {
+        color: #8b2f2f;
+        opacity: 0.9;
+      }
       .pomodoro-controls button {
         padding: 6px;
         margin: 6px;
@@ -800,6 +811,7 @@
               7:30
             </span>
           </div>
+          <div class="work-save-status" id="work-save-status"></div>
           <div class="pomodoro-controls">
             <button id="toggle" class="icon-btn" title="Start/Pause">
               <i id="toggle-icon" class="fa-solid fa-play"></i>
@@ -1244,6 +1256,7 @@
       const elapsedEl = document.getElementById("work-elapsed");
       const deltaEl = document.getElementById("work-delta");
       const targetEl = document.getElementById("work-target");
+      const saveStatusEl = document.getElementById("work-save-status");
       const toggleBtn = document.getElementById("toggle");
       const toggleIcon = document.getElementById("toggle-icon");
       const resetBtn = document.getElementById("reset");
@@ -1314,6 +1327,20 @@
         else deltaEl.textContent = `Over ${formatHMS(-diff)}`;
       }
 
+      let saveStatusTimer = null;
+      function showSaveStatus(text, isError) {
+        if (!saveStatusEl) return;
+        if (saveStatusTimer) {
+          clearTimeout(saveStatusTimer);
+          saveStatusTimer = null;
+        }
+        saveStatusEl.textContent = text;
+        saveStatusEl.classList.toggle("is-error", !!isError);
+        saveStatusTimer = setTimeout(() => {
+          if (!isError) saveStatusEl.textContent = "";
+        }, 3000);
+      }
+
       function persistState() {
         try {
           localStorage.setItem(LS_WORK_ELAPSED, String(elapsedSeconds));
@@ -1323,7 +1350,17 @@
           } else {
             localStorage.removeItem(LS_WORK_LAST_START);
           }
-        } catch (e) {}
+          showSaveStatus(
+            "Saved " +
+              new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+              })
+          );
+        } catch (e) {
+          showSaveStatus("Storage unavailable", true);
+        }
       }
 
       function updateElapsedDisplay() {
@@ -1382,7 +1419,12 @@
         const parsed = parseTargetToSeconds(targetEl.textContent || "");
         if (parsed !== null && parsed >= 0) {
           targetSeconds = parsed;
-          localStorage.setItem(LS_WORK_TARGET, String(targetSeconds));
+          try {
+            localStorage.setItem(LS_WORK_TARGET, String(targetSeconds));
+            showSaveStatus("Saved target");
+          } catch (e) {
+            showSaveStatus("Storage unavailable", true);
+          }
           targetEl.textContent = formatHM(targetSeconds);
           updateDelta();
         } else {
@@ -1391,29 +1433,35 @@
       }
 
       function restoreWorkState() {
-        const savedElapsed = parseInt(
-          localStorage.getItem(LS_WORK_ELAPSED) || "",
-          10
-        );
-        if (!isNaN(savedElapsed) && savedElapsed >= 0) {
-          elapsedSeconds = savedElapsed;
-        }
-        const savedRunning = localStorage.getItem(LS_WORK_RUNNING) === "true";
-        const lastStartMs = parseInt(
-          localStorage.getItem(LS_WORK_LAST_START) || "",
-          10
-        );
-        if (savedRunning) {
-          if (!isNaN(lastStartMs) && lastStartMs > 0) {
-            const diff = Math.floor((Date.now() - lastStartMs) / 1000);
-            if (diff > 0) elapsedSeconds += diff;
+        try {
+          const savedElapsed = parseInt(
+            localStorage.getItem(LS_WORK_ELAPSED) || "",
+            10
+          );
+          if (!isNaN(savedElapsed) && savedElapsed >= 0) {
+            elapsedSeconds = savedElapsed;
           }
-          isRunning = false;
-          startTimer();
-        } else {
-          updateToggleIcon();
+          const savedRunning =
+            localStorage.getItem(LS_WORK_RUNNING) === "true";
+          const lastStartMs = parseInt(
+            localStorage.getItem(LS_WORK_LAST_START) || "",
+            10
+          );
+          if (savedRunning) {
+            if (!isNaN(lastStartMs) && lastStartMs > 0) {
+              const diff = Math.floor((Date.now() - lastStartMs) / 1000);
+              if (diff > 0) elapsedSeconds += diff;
+            }
+            isRunning = false;
+            startTimer();
+          } else {
+            updateToggleIcon();
+          }
+          updateElapsedDisplay();
+          showSaveStatus("Restored");
+        } catch (e) {
+          showSaveStatus("Storage unavailable", true);
         }
-        updateElapsedDisplay();
       }
 
       if (targetEl) {
