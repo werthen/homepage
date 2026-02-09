@@ -290,14 +290,14 @@
         margin-left: 4px;
         min-width: 64px;
       }
-      .work-save-status {
+      .settings-save-status {
         font-family: "Roboto Mono", monospace;
         font-size: 0.8rem;
         color: var(--text-muted);
         opacity: 0.75;
         min-height: 1em;
       }
-      .work-save-status.is-error {
+      .settings-save-status.is-error {
         color: #8b2f2f;
         opacity: 0.9;
       }
@@ -772,6 +772,7 @@
             <option value="dark">Dark</option>
           </select>
         </div>
+        <div class="settings-save-status" id="work-save-status"></div>
         <div class="settings-actions">
           <button class="btn-ghost" id="settings-cancel">Cancel</button>
           <button class="btn-ghost" id="settings-reset">
@@ -800,18 +801,17 @@
         <div class="widget pomodoro">
           <div class="pomodoro-timer" id="work-elapsed">00:00:00</div>
           <div class="work-delta" id="work-delta">Remaining 7:30:00</div>
-          <div class="work-target-row">
-            Target
-            <span
-              class="editable-duration"
-              id="work-target"
-              contenteditable="true"
-              tabindex="0"
-            >
-              7:30
-            </span>
-          </div>
-          <div class="work-save-status" id="work-save-status"></div>
+        <div class="work-target-row">
+          Target
+          <span
+            class="editable-duration"
+            id="work-target"
+            contenteditable="true"
+            tabindex="0"
+          >
+            7:30
+          </span>
+        </div>
           <div class="pomodoro-controls">
             <button id="toggle" class="icon-btn" title="Start/Pause">
               <i id="toggle-icon" class="fa-solid fa-play"></i>
@@ -1327,21 +1327,13 @@
         else deltaEl.textContent = `Over ${formatHMS(-diff)}`;
       }
 
-      let saveStatusTimer = null;
       function showSaveStatus(text, isError) {
         if (!saveStatusEl) return;
-        if (saveStatusTimer) {
-          clearTimeout(saveStatusTimer);
-          saveStatusTimer = null;
-        }
         saveStatusEl.textContent = text;
         saveStatusEl.classList.toggle("is-error", !!isError);
-        saveStatusTimer = setTimeout(() => {
-          if (!isError) saveStatusEl.textContent = "";
-        }, 3000);
       }
 
-      function persistState() {
+      function persistState(showStatus) {
         try {
           localStorage.setItem(LS_WORK_ELAPSED, String(elapsedSeconds));
           localStorage.setItem(LS_WORK_RUNNING, isRunning ? "true" : "false");
@@ -1350,16 +1342,18 @@
           } else {
             localStorage.removeItem(LS_WORK_LAST_START);
           }
-          showSaveStatus(
-            "Saved " +
-              new Date().toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-              })
-          );
+          if (showStatus) {
+            showSaveStatus(
+              "Saved " +
+                new Date().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                })
+            );
+          }
         } catch (e) {
-          showSaveStatus("Storage unavailable", true);
+          if (showStatus) showSaveStatus("Storage unavailable", true);
         }
       }
 
@@ -1379,7 +1373,7 @@
           elapsedSeconds += diff;
           lastTickMs += diff * 1000;
           updateElapsedDisplay();
-          persistState();
+          persistState(false);
         }
       }
 
@@ -1389,7 +1383,7 @@
         lastTickMs = Date.now();
         timerInterval = setInterval(tick, 250);
         updateToggleIcon();
-        persistState();
+        persistState(true);
       }
 
       function pauseTimer() {
@@ -1399,14 +1393,14 @@
         timerInterval = null;
         lastTickMs = null;
         updateToggleIcon();
-        persistState();
+        persistState(true);
       }
 
       function resetTimer() {
         pauseTimer();
         elapsedSeconds = 0;
         updateElapsedDisplay();
-        persistState();
+        persistState(true);
       }
 
       function updateToggleIcon() {
@@ -1515,7 +1509,7 @@
       });
       resetBtn.addEventListener("click", resetTimer);
       restoreWorkState();
-      window.addEventListener("beforeunload", persistState);
+      window.addEventListener("beforeunload", () => persistState(false));
 
       // Weather
       async function fetchWeather() {
