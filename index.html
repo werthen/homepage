@@ -274,11 +274,69 @@
         margin-bottom: 8px;
         color: var(--text);
       }
+      .work-mode-toggle {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        padding: 4px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(32, 42, 32, 0.08);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+        margin-bottom: 10px;
+        overflow: hidden;
+      }
+      .work-mode-toggle .mode-btn {
+        position: relative;
+        z-index: 2;
+        border: none;
+        background: transparent;
+        padding: 6px 14px;
+        font-family: "Merriweather", serif;
+        font-size: 0.92rem;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: color 180ms ease;
+      }
+      .work-mode-toggle .mode-btn.is-active {
+        color: var(--text);
+      }
+      .work-mode-toggle .mode-indicator {
+        position: absolute;
+        top: 4px;
+        bottom: 4px;
+        left: 4px;
+        width: calc(50% - 4px);
+        border-radius: 999px;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.9),
+          rgba(255, 255, 255, 0.6)
+        );
+        box-shadow: 0 6px 12px rgba(28, 38, 28, 0.08);
+        transition: transform 220ms cubic-bezier(0.2, 0.9, 0.2, 1);
+        will-change: transform;
+      }
+      .work-mode-toggle[data-mode="shallow"] .mode-indicator {
+        transform: translateX(100%);
+      }
       .work-delta {
         font-family: "Roboto Mono", monospace;
         font-size: 1.05rem;
         color: var(--text-muted);
         margin-bottom: 10px;
+      }
+      .work-totals {
+        display: flex;
+        justify-content: center;
+        gap: 14px;
+        font-family: "Roboto Mono", monospace;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+        flex-wrap: wrap;
       }
       .work-target-row {
         font-family: "Merriweather", serif;
@@ -799,19 +857,38 @@
           <div class="date-display" id="date">Monday, October 28, 2025</div>
         </div>
         <div class="widget pomodoro">
-          <div class="pomodoro-timer" id="work-elapsed">00:00:00</div>
-          <div class="work-delta" id="work-delta">Remaining 7:30:00</div>
-        <div class="work-target-row">
-          Target
-          <span
-            class="editable-duration"
-            id="work-target"
-            contenteditable="true"
-            tabindex="0"
+          <div
+            class="work-mode-toggle"
+            id="work-mode-toggle"
+            data-mode="deep"
+            role="tablist"
+            aria-label="Work mode"
           >
-            7:30
-          </span>
-        </div>
+            <button class="mode-btn is-active" data-mode="deep" aria-pressed="true">
+              Deep
+            </button>
+            <button class="mode-btn" data-mode="shallow" aria-pressed="false">
+              Shallow
+            </button>
+            <div class="mode-indicator" aria-hidden="true"></div>
+          </div>
+          <div class="pomodoro-timer" id="work-elapsed">00:00:00</div>
+          <div class="work-delta" id="work-delta">Deep remaining 7:30:00</div>
+          <div class="work-totals">
+            <span id="work-deep-total">Deep 00:00:00</span>
+            <span id="work-shallow-total">Shallow 00:00:00</span>
+          </div>
+          <div class="work-target-row">
+            Target
+            <span
+              class="editable-duration"
+              id="work-target"
+              contenteditable="true"
+              tabindex="0"
+            >
+              7:30
+            </span>
+          </div>
           <div class="pomodoro-controls">
             <button id="toggle" class="icon-btn" title="Start/Pause">
               <i id="toggle-icon" class="fa-solid fa-play"></i>
@@ -1244,18 +1321,26 @@
 
       // Work Tracker Timer
       let timerInterval = null;
-      let elapsedSeconds = 0;
+      let deepSeconds = 0;
+      let shallowSeconds = 0;
+      let activeMode = "deep";
       let lastTickMs = null;
       let isRunning = false;
       let targetSeconds = 7 * 3600 + 30 * 60;
 
       const LS_WORK_TARGET = "work_target_seconds";
+      const LS_WORK_DEEP = "work_deep_seconds";
+      const LS_WORK_SHALLOW = "work_shallow_seconds";
+      const LS_WORK_MODE = "work_mode";
       const LS_WORK_ELAPSED = "work_elapsed_seconds";
       const LS_WORK_RUNNING = "work_is_running";
       const LS_WORK_LAST_START = "work_last_start_ms";
       const elapsedEl = document.getElementById("work-elapsed");
       const deltaEl = document.getElementById("work-delta");
       const targetEl = document.getElementById("work-target");
+      const deepTotalEl = document.getElementById("work-deep-total");
+      const shallowTotalEl = document.getElementById("work-shallow-total");
+      const modeToggleEl = document.getElementById("work-mode-toggle");
       const saveStatusEl = document.getElementById("work-save-status");
       const toggleBtn = document.getElementById("toggle");
       const toggleIcon = document.getElementById("toggle-icon");
@@ -1320,11 +1405,15 @@
         return null;
       }
 
+      function getActiveSeconds() {
+        return activeMode === "deep" ? deepSeconds : shallowSeconds;
+      }
+
       function updateDelta() {
         if (!deltaEl) return;
-        const diff = targetSeconds - elapsedSeconds;
-        if (diff >= 0) deltaEl.textContent = `Remaining ${formatHMS(diff)}`;
-        else deltaEl.textContent = `Over ${formatHMS(-diff)}`;
+        const diff = targetSeconds - deepSeconds;
+        if (diff >= 0) deltaEl.textContent = `Deep remaining ${formatHMS(diff)}`;
+        else deltaEl.textContent = `Deep over ${formatHMS(-diff)}`;
       }
 
       function showSaveStatus(text, isError) {
@@ -1335,7 +1424,9 @@
 
       function persistState(showStatus) {
         try {
-          localStorage.setItem(LS_WORK_ELAPSED, String(elapsedSeconds));
+          localStorage.setItem(LS_WORK_DEEP, String(deepSeconds));
+          localStorage.setItem(LS_WORK_SHALLOW, String(shallowSeconds));
+          localStorage.setItem(LS_WORK_MODE, activeMode);
           localStorage.setItem(LS_WORK_RUNNING, isRunning ? "true" : "false");
           if (isRunning && lastTickMs !== null) {
             localStorage.setItem(LS_WORK_LAST_START, String(lastTickMs));
@@ -1357,8 +1448,22 @@
         }
       }
 
+      function updateModeUI() {
+        if (!modeToggleEl) return;
+        modeToggleEl.dataset.mode = activeMode;
+        const buttons = modeToggleEl.querySelectorAll(".mode-btn");
+        buttons.forEach((btn) => {
+          const isActive = btn.dataset.mode === activeMode;
+          btn.classList.toggle("is-active", isActive);
+          btn.setAttribute("aria-pressed", isActive ? "true" : "false");
+        });
+      }
+
       function updateElapsedDisplay() {
-        if (elapsedEl) elapsedEl.textContent = formatHMS(elapsedSeconds);
+        if (elapsedEl) elapsedEl.textContent = formatHMS(getActiveSeconds());
+        if (deepTotalEl) deepTotalEl.textContent = `Deep ${formatHMS(deepSeconds)}`;
+        if (shallowTotalEl)
+          shallowTotalEl.textContent = `Shallow ${formatHMS(shallowSeconds)}`;
         updateDelta();
       }
 
@@ -1370,7 +1475,8 @@
         }
         const diff = Math.floor((now - lastTickMs) / 1000);
         if (diff > 0) {
-          elapsedSeconds += diff;
+          if (activeMode === "deep") deepSeconds += diff;
+          else shallowSeconds += diff;
           lastTickMs += diff * 1000;
           updateElapsedDisplay();
           persistState(false);
@@ -1398,7 +1504,8 @@
 
       function resetTimer() {
         pauseTimer();
-        elapsedSeconds = 0;
+        deepSeconds = 0;
+        shallowSeconds = 0;
         updateElapsedDisplay();
         persistState(true);
       }
@@ -1428,13 +1535,25 @@
 
       function restoreWorkState() {
         try {
-          const savedElapsed = parseInt(
-            localStorage.getItem(LS_WORK_ELAPSED) || "",
+          const savedDeep = parseInt(localStorage.getItem(LS_WORK_DEEP) || "", 10);
+          const savedShallow = parseInt(
+            localStorage.getItem(LS_WORK_SHALLOW) || "",
             10
           );
-          if (!isNaN(savedElapsed) && savedElapsed >= 0) {
-            elapsedSeconds = savedElapsed;
+          if (!isNaN(savedDeep) && savedDeep >= 0) deepSeconds = savedDeep;
+          if (!isNaN(savedShallow) && savedShallow >= 0)
+            shallowSeconds = savedShallow;
+          if (isNaN(savedDeep) && isNaN(savedShallow)) {
+            const legacyElapsed = parseInt(
+              localStorage.getItem(LS_WORK_ELAPSED) || "",
+              10
+            );
+            if (!isNaN(legacyElapsed) && legacyElapsed >= 0)
+              deepSeconds = legacyElapsed;
           }
+          const savedMode = localStorage.getItem(LS_WORK_MODE);
+          if (savedMode === "deep" || savedMode === "shallow")
+            activeMode = savedMode;
           const savedRunning =
             localStorage.getItem(LS_WORK_RUNNING) === "true";
           const lastStartMs = parseInt(
@@ -1444,13 +1563,17 @@
           if (savedRunning) {
             if (!isNaN(lastStartMs) && lastStartMs > 0) {
               const diff = Math.floor((Date.now() - lastStartMs) / 1000);
-              if (diff > 0) elapsedSeconds += diff;
+              if (diff > 0) {
+                if (activeMode === "deep") deepSeconds += diff;
+                else shallowSeconds += diff;
+              }
             }
             isRunning = false;
             startTimer();
           } else {
             updateToggleIcon();
           }
+          updateModeUI();
           updateElapsedDisplay();
           showSaveStatus("Restored");
         } catch (e) {
@@ -1508,6 +1631,23 @@
         else startTimer();
       });
       resetBtn.addEventListener("click", resetTimer);
+      if (modeToggleEl) {
+        modeToggleEl.addEventListener("click", (e) => {
+          const btn = e.target.closest(".mode-btn");
+          if (!btn) return;
+          const mode = btn.dataset.mode;
+          if (mode !== "deep" && mode !== "shallow") return;
+          if (mode === activeMode) return;
+          if (isRunning) {
+            tick();
+            lastTickMs = Date.now();
+          }
+          activeMode = mode;
+          updateModeUI();
+          updateElapsedDisplay();
+          persistState(true);
+        });
+      }
       restoreWorkState();
       window.addEventListener("beforeunload", () => persistState(false));
 
