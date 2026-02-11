@@ -952,21 +952,28 @@
       body.dark-mode .work-mode-toggle {
         background: linear-gradient(
           180deg,
-          rgba(17, 25, 35, 0.85),
-          rgba(12, 18, 26, 0.7)
+          rgba(26, 38, 52, 0.92),
+          rgba(16, 24, 34, 0.9)
         );
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-          0 10px 20px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.35), 0 12px 24px rgba(0, 0, 0, 0.45);
+      }
+      body.dark-mode .work-mode-toggle .mode-btn {
+        color: rgba(213, 223, 232, 0.72);
+      }
+      body.dark-mode .work-mode-toggle .mode-btn.is-active {
+        color: #f3f7fb;
+        text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
       }
       body.dark-mode .work-mode-toggle .mode-indicator {
         background: linear-gradient(
           180deg,
-          rgba(30, 44, 60, 0.95),
-          rgba(20, 30, 44, 0.8)
+          rgba(189, 149, 88, 0.55),
+          rgba(110, 83, 48, 0.52)
         );
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5),
-          inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+        box-shadow: inset 0 0 0 1px rgba(255, 223, 170, 0.38),
+          0 10px 18px rgba(0, 0, 0, 0.4);
       }
       .work-mode-toggle[data-mode="shallow"] .mode-indicator {
         transform: translateX(100%);
@@ -1010,6 +1017,41 @@
         font-variant-numeric: tabular-nums;
         font-feature-settings: "tnum" 1;
         font-weight: 400;
+      }
+      .work-breakdown {
+        position: relative;
+        height: 12px;
+        border-radius: 999px;
+        background: rgba(20, 24, 30, 0.1);
+        overflow: hidden;
+        margin: 8px auto 12px;
+        width: min(92%, 360px);
+      }
+      .work-breakdown-segment {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+      }
+      .work-breakdown-segment.deep {
+        left: 0;
+        width: 0%;
+        background: linear-gradient(
+          90deg,
+          rgba(43, 92, 63, 0.75),
+          rgba(43, 92, 63, 0.45)
+        );
+      }
+      .work-breakdown-segment.shallow {
+        right: 0;
+        width: 0%;
+        background: linear-gradient(
+          90deg,
+          rgba(138, 106, 59, 0.55),
+          rgba(138, 106, 59, 0.85)
+        );
+      }
+      body.dark-mode .work-breakdown {
+        background: rgba(255, 255, 255, 0.08);
       }
       .work-target-row {
         font-family: var(--font-hand);
@@ -1090,28 +1132,44 @@
         );
       }
       body.dark-mode .youtube-compact {
-        background: rgba(14, 20, 28, 0.85);
-        border: 1px dashed rgba(255, 255, 255, 0.12);
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-          0 12px 24px rgba(0, 0, 0, 0.5);
+        background: linear-gradient(
+          180deg,
+          rgba(24, 35, 49, 0.95),
+          rgba(13, 21, 31, 0.92)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.36), 0 12px 28px rgba(0, 0, 0, 0.5);
       }
       body.dark-mode .youtube-compact .yt-toggle {
         background: linear-gradient(
           180deg,
-          rgba(24, 34, 48, 0.9),
-          rgba(16, 24, 36, 0.9)
+          rgba(196, 156, 93, 0.55),
+          rgba(108, 83, 49, 0.62)
         );
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.45);
+        border: 1px solid rgba(255, 228, 177, 0.34);
+        color: #f6f1e8;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14),
+          0 8px 16px rgba(0, 0, 0, 0.45);
+      }
+      body.dark-mode .youtube-compact .yt-toggle i {
+        color: #f6f1e8;
+      }
+      body.dark-mode .youtube-compact .yt-title {
+        color: #edf3f8;
+      }
+      body.dark-mode .youtube-compact .yt-time {
+        color: rgba(219, 229, 238, 0.9);
       }
       body.dark-mode .youtube-compact .yt-progress {
-        background: rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.14);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09);
       }
       body.dark-mode .youtube-compact .yt-progress-fill {
         background: linear-gradient(
           90deg,
-          rgba(184, 146, 90, 0.7),
-          rgba(184, 146, 90, 0.25)
+          rgba(213, 175, 119, 0.85),
+          rgba(117, 159, 196, 0.55)
         );
       }
       .settings-save-status {
@@ -1699,8 +1757,19 @@
           <div class="pomodoro-timer" id="work-elapsed">00:00:00</div>
           <div class="work-delta" id="work-delta">Deep remaining 7:30:00</div>
           <div class="work-totals">
-            <span id="work-deep-total">Deep 00:00:00</span>
-            <span id="work-shallow-total">Shallow 00:00:00</span>
+            <span id="work-deep-total">Deep 0:00</span>
+            <span id="work-shallow-total">Shallow 0:00</span>
+            <span id="work-total-worked">Total 0:00</span>
+          </div>
+          <div class="work-breakdown" aria-label="Deep and shallow work split">
+            <div
+              class="work-breakdown-segment deep"
+              id="work-breakdown-deep"
+            ></div>
+            <div
+              class="work-breakdown-segment shallow"
+              id="work-breakdown-shallow"
+            ></div>
           </div>
           <div class="work-target-row">
             Target
@@ -2185,6 +2254,9 @@
       const targetEl = document.getElementById("work-target");
       const deepTotalEl = document.getElementById("work-deep-total");
       const shallowTotalEl = document.getElementById("work-shallow-total");
+      const totalWorkedEl = document.getElementById("work-total-worked");
+      const breakdownDeepEl = document.getElementById("work-breakdown-deep");
+      const breakdownShallowEl = document.getElementById("work-breakdown-shallow");
       const modeToggleEl = document.getElementById("work-mode-toggle");
       const saveStatusEl = document.getElementById("work-save-status");
       const toggleBtn = document.getElementById("toggle");
@@ -2304,11 +2376,30 @@
         });
       }
 
+      function updateBreakdownBar() {
+        if (!breakdownDeepEl || !breakdownShallowEl) return;
+        const total = deepSeconds + shallowSeconds;
+        if (total <= 0) {
+          breakdownDeepEl.style.width = "0%";
+          breakdownShallowEl.style.width = "0%";
+          return;
+        }
+        const deepPct = (deepSeconds / total) * 100;
+        const shallowPct = 100 - deepPct;
+        breakdownDeepEl.style.width = deepPct.toFixed(2) + "%";
+        breakdownShallowEl.style.width = shallowPct.toFixed(2) + "%";
+      }
+
       function updateElapsedDisplay() {
         if (elapsedEl) elapsedEl.textContent = formatHMS(getActiveSeconds());
-        if (deepTotalEl) deepTotalEl.textContent = `Deep ${formatHMS(deepSeconds)}`;
+        if (deepTotalEl) deepTotalEl.textContent = `Deep ${formatHM(deepSeconds)}`;
         if (shallowTotalEl)
-          shallowTotalEl.textContent = `Shallow ${formatHMS(shallowSeconds)}`;
+          shallowTotalEl.textContent = `Shallow ${formatHM(shallowSeconds)}`;
+        if (totalWorkedEl)
+          totalWorkedEl.textContent = `Total ${formatHM(
+            deepSeconds + shallowSeconds
+          )}`;
+        updateBreakdownBar();
         updateDelta();
       }
 
