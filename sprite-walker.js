@@ -22,6 +22,8 @@
     var lastTime = 0;
     var running = false;
     var resizeRaf = null;
+    var hover = { x: 0, y: 0, inCanvas: false };
+    var label = null;
     // Performance knobs
     var lowPower = !!window._lowPower || (navigator.connection && navigator.connection.saveData) || (navigator.deviceMemory && navigator.deviceMemory < 2);
     var MAX_SPRITE_FPS = lowPower ? 20 : 60; // cap sprite loop FPS
@@ -55,6 +57,7 @@
         this.userScale = (typeof opts.scale === 'number') ? opts.scale : 0.6;
         this.offsetY = (typeof opts.offsetY === 'number') ? opts.offsetY : 0;
         this.margin = 12;
+        this.name = opts.name || '';
         this._frames = STATES.rest.frames.slice();
         this._scaledW = frameW; this._scaledH = frameH;
     }
@@ -143,6 +146,52 @@
         ctx.drawImage(sheet, sx, sy, frameW, frameH, this.x, destY, dw, dh);
     };
 
+    function ensureLabel() {
+        if (label) return;
+        label = document.createElement('div');
+        label.className = 'dog-label';
+        label.textContent = '';
+        document.body.appendChild(label);
+    }
+
+    function hideLabel() {
+        if (!label) return;
+        label.style.opacity = '0';
+    }
+
+    function setLabelForWalker(w) {
+        if (!w || !w.name) return hideLabel();
+        ensureLabel();
+        var rect = canvas.getBoundingClientRect();
+        var dw = w._scaledW || frameW;
+        var dh = w._scaledH || frameH;
+        var destY = cssHeight - dh - w.offsetY;
+        label.textContent = w.name;
+        label.style.left = (rect.left + w.x + dw / 2) + 'px';
+        label.style.top = (rect.top + destY - 6) + 'px';
+        label.style.opacity = '1';
+    }
+
+    function getHoveredWalker(mx, my) {
+        for (var i = walkers.length - 1; i >= 0; i--) {
+            var w = walkers[i];
+            var dw = w._scaledW || frameW;
+            var dh = w._scaledH || frameH;
+            var destY = cssHeight - dh - w.offsetY;
+            if (mx >= w.x && mx <= w.x + dw && my >= destY && my <= destY + dh) {
+                return w;
+            }
+        }
+        return null;
+    }
+
+    function updateHoverLabel() {
+        if (!hover.inCanvas) return hideLabel();
+        var w = getHoveredWalker(hover.x, hover.y);
+        if (!w) return hideLabel();
+        setLabelForWalker(w);
+    }
+
     function resizeCanvas() {
         var rect = canvas.getBoundingClientRect();
         cssWidth = rect.width; cssHeight = rect.height;
@@ -174,8 +223,8 @@
         window.addEventListener('resize', scheduleResize);
         // create a smaller number of walkers on low-power devices
         if (walkers.length === 0) {
-            addWalker({ x: 40, scale: 0.6, offsetY: 0 });
-            if (!lowPower) addWalker({ x: 220, scale: 0.6, offsetY: 0 });
+            addWalker({ x: 40, scale: 0.6, offsetY: 0, name: 'Baileys' });
+            if (!lowPower) addWalker({ x: 220, scale: 0.6, offsetY: 0, name: 'Cava' });
         }
         startLoop();
     };
@@ -205,7 +254,11 @@
     }
 
     function update(dt) { walkers.forEach(function(w){ w.update(dt); }); }
-    function render() { ctx.clearRect(0,0,cssWidth, cssHeight); walkers.forEach(function(w){ w.render(); }); }
+    function render() {
+        ctx.clearRect(0,0,cssWidth, cssHeight);
+        walkers.forEach(function(w){ w.render(); });
+        updateHoverLabel();
+    }
 
     function addWalker(opts) {
         var w = new Walker(opts);
@@ -228,6 +281,23 @@
 
     document.addEventListener('visibilitychange', function(){
         if (!document.hidden) startLoop();
+    });
+
+    window.addEventListener('mousemove', function(e){
+        var rect = canvas.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        hover.inCanvas = (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height);
+        if (hover.inCanvas) {
+            hover.x = x;
+            hover.y = y;
+        }
+        updateHoverLabel();
+    }, { passive: true });
+
+    window.addEventListener('mouseleave', function(){
+        hover.inCanvas = false;
+        hideLabel();
     });
 
 })();
