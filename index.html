@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
@@ -99,8 +99,11 @@
       .widget,
       .container,
       .youtube-wrapper {
-        transition: background 280ms ease, color 280ms ease,
-          box-shadow 280ms ease, border-color 280ms ease;
+        transition:
+          background 280ms ease,
+          color 280ms ease,
+          box-shadow 280ms ease,
+          border-color 280ms ease;
       }
 
       /* Dark mode: soften youtube wrapper background so iframe edges don't feel harsh */
@@ -122,7 +125,8 @@
         margin: 0;
         padding: 28px;
         /* use paper as the gradient end so dark-mode keeps a dark gradient */
-        background: radial-gradient(
+        background:
+          radial-gradient(
             1200px 800px at 6% -10%,
             var(--ink-wash-1),
             transparent 60%
@@ -257,7 +261,8 @@
         position: fixed;
         inset: -10%;
         pointer-events: none;
-        background: radial-gradient(
+        background:
+          radial-gradient(
             320px 240px at 12% 18%,
             var(--ink-wash-1),
             transparent 62%
@@ -344,7 +349,8 @@
         --tz: 0px;
         --scale: 1;
         background: var(--paper);
-        background-image: linear-gradient(var(--paper), var(--paper)),
+        background-image:
+          linear-gradient(var(--paper), var(--paper)),
           repeating-linear-gradient(
             0deg,
             transparent 0 18px,
@@ -360,23 +366,29 @@
             transparent 0 12px,
             var(--fiber-2) 12px 13px
           ),
-          radial-gradient(
-            var(--paper-speckle) 1px,
-            transparent 1.5px
-          ),
+          radial-gradient(var(--paper-speckle) 1px, transparent 1.5px),
           repeating-linear-gradient(
             140deg,
             transparent 0 6px,
             var(--paper-fiber) 6px 7px
           ),
           var(--paper-texture);
-        background-blend-mode: normal, multiply, multiply, screen, multiply, multiply, multiply;
-        background-size: auto, auto, auto, auto, 9px 9px, auto, 160px 160px;
+        background-blend-mode:
+          normal, multiply, multiply, screen, multiply, multiply, multiply;
+        background-size:
+          auto,
+          auto,
+          auto,
+          auto,
+          9px 9px,
+          auto,
+          160px 160px;
         position: relative;
         overflow: hidden;
         transform: perspective(800px) translateZ(var(--tz)) rotateX(var(--rx))
           rotateY(var(--ry)) scale(var(--scale));
-        transition: transform 220ms cubic-bezier(0.2, 0.9, 0.2, 1),
+        transition:
+          transform 220ms cubic-bezier(0.2, 0.9, 0.2, 1),
           box-shadow 220ms cubic-bezier(0.2, 0.9, 0.2, 1);
         display: flex;
         flex-direction: column;
@@ -600,11 +612,7 @@
         margin-top: 6px;
         width: 46px;
         height: 1px;
-        background: linear-gradient(
-          90deg,
-          var(--accent),
-          transparent 80%
-        );
+        background: linear-gradient(90deg, var(--accent), transparent 80%);
         opacity: 0.35;
       }
       .ink-ornament {
@@ -621,7 +629,8 @@
       .ink-ornament.ink-1 {
         top: -48px;
         right: -36px;
-        background: radial-gradient(
+        background:
+          radial-gradient(
             45% 55% at 60% 40%,
             rgba(30, 36, 48, 0.35),
             transparent 70%
@@ -643,7 +652,8 @@
         width: 210px;
         height: 180px;
         animation-delay: 1.5s;
-        background: radial-gradient(
+        background:
+          radial-gradient(
             50% 60% at 40% 40%,
             rgba(20, 28, 36, 0.28),
             transparent 72%
@@ -660,7 +670,8 @@
         width: 140px;
         height: 120px;
         animation-delay: 0.6s;
-        background: radial-gradient(
+        background:
+          radial-gradient(
             50% 60% at 45% 45%,
             rgba(30, 36, 48, 0.22),
             transparent 70%
@@ -710,7 +721,8 @@
         content: "";
         position: absolute;
         inset: 0;
-        background: var(--sheen),
+        background:
+          var(--sheen),
           repeating-linear-gradient(
             135deg,
             rgba(0, 0, 0, 0.06) 0 2px,
@@ -726,7 +738,8 @@
         position: absolute;
         inset: -1px;
         border-radius: inherit;
-        box-shadow: inset 0 0 0 1px var(--paper-edge),
+        box-shadow:
+          inset 0 0 0 1px var(--paper-edge),
           inset 0 -12px 18px rgba(20, 24, 30, 0.06);
         pointer-events: none;
         opacity: 0.45;
@@ -912,7 +925,8 @@
           rgba(255, 255, 255, 0.55)
         );
         border: 1px solid var(--card-border);
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.5),
           0 10px 20px rgba(20, 24, 30, 0.08);
         margin-bottom: 10px;
         overflow: hidden;
@@ -944,7 +958,8 @@
           rgba(255, 255, 255, 0.98),
           rgba(255, 255, 255, 0.7)
         );
-        box-shadow: 0 6px 14px rgba(20, 24, 30, 0.12),
+        box-shadow:
+          0 6px 14px rgba(20, 24, 30, 0.12),
           inset 0 0 0 1px rgba(255, 255, 255, 0.4);
         transition: transform 220ms cubic-bezier(0.2, 0.9, 0.2, 1);
         will-change: transform;
@@ -956,8 +971,10 @@
           rgba(16, 24, 34, 0.9)
         );
         border: 1px solid rgba(255, 255, 255, 0.14);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1),
-          inset 0 -1px 0 rgba(0, 0, 0, 0.35), 0 12px 24px rgba(0, 0, 0, 0.45);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.1),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+          0 12px 24px rgba(0, 0, 0, 0.45);
       }
       body.dark-mode .work-mode-toggle .mode-btn {
         color: rgba(213, 223, 232, 0.72);
@@ -972,7 +989,8 @@
           rgba(189, 149, 88, 0.55),
           rgba(110, 83, 48, 0.52)
         );
-        box-shadow: inset 0 0 0 1px rgba(255, 223, 170, 0.38),
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 223, 170, 0.38),
           0 10px 18px rgba(0, 0, 0, 0.4);
       }
       .work-mode-toggle[data-mode="shallow"] .mode-indicator {
@@ -1071,7 +1089,8 @@
         border-radius: 12px;
         border: 1px dashed var(--paper-edge);
         background: rgba(255, 255, 255, 0.7);
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35),
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.35),
           0 12px 24px rgba(12, 16, 22, 0.08);
         margin-bottom: 12px;
       }
@@ -1138,8 +1157,10 @@
           rgba(13, 21, 31, 0.92)
         );
         border: 1px solid rgba(255, 255, 255, 0.14);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08),
-          inset 0 -1px 0 rgba(0, 0, 0, 0.36), 0 12px 28px rgba(0, 0, 0, 0.5);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.08),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.36),
+          0 12px 28px rgba(0, 0, 0, 0.5);
       }
       body.dark-mode .youtube-compact .yt-toggle {
         background: linear-gradient(
@@ -1149,7 +1170,8 @@
         );
         border: 1px solid rgba(255, 228, 177, 0.34);
         color: #f6f1e8;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.14),
           0 8px 16px rgba(0, 0, 0, 0.45);
       }
       body.dark-mode .youtube-compact .yt-toggle i {
@@ -1188,7 +1210,9 @@
         margin: 6px;
         border-radius: 10px;
         cursor: pointer;
-        transition: transform 0.12s ease, box-shadow 0.12s ease;
+        transition:
+          transform 0.12s ease,
+          box-shadow 0.12s ease;
       }
       .pomodoro-controls {
         display: flex;
@@ -1563,12 +1587,14 @@
         bottom: 28px;
         right: 28px;
         max-height: 75px;
-        max-width: 360px;
+        /* max-width: 360px; */
         padding: 0;
         font-family: var(--font-hand);
         color: var(--text);
         opacity: 0.98;
-        transition: transform 0.12s ease, opacity 0.12s ease;
+        transition:
+          transform 0.12s ease,
+          opacity 0.12s ease;
         background: transparent;
         border: none;
         box-shadow: none;
@@ -1578,7 +1604,8 @@
         font-size: 0.95rem;
         line-height: 1.3;
         opacity: 0;
-        transition: opacity 600ms ease,
+        transition:
+          opacity 600ms ease,
           transform 600ms cubic-bezier(0.2, 0.9, 0.2, 1);
         transform: translateY(6px);
         background: transparent;
@@ -1746,7 +1773,11 @@
             role="tablist"
             aria-label="Work mode"
           >
-            <button class="mode-btn is-active" data-mode="deep" aria-pressed="true">
+            <button
+              class="mode-btn is-active"
+              data-mode="deep"
+              aria-pressed="true"
+            >
               Deep
             </button>
             <button class="mode-btn" data-mode="shallow" aria-pressed="false">
@@ -1826,7 +1857,14 @@
               src="https://www.youtube.com/embed/KLPApSRku8Y?rel=0&enablejsapi=1&playsinline=1"
               allowfullscreen
               scrolling="no"
-              allow="accelerometer *; clipboard-write *; encrypted-media *; gyroscope *; picture-in-picture *; web-share *;"
+              allow="
+                accelerometer *;
+                clipboard-write *;
+                encrypted-media *;
+                gyroscope *;
+                picture-in-picture *;
+                web-share *;
+              "
               referrerpolicy="strict-origin"
             ></iframe>
           </div>
@@ -1847,7 +1885,7 @@
       (function () {
         var body = document.body;
         var widgets = Array.prototype.slice.call(
-          document.querySelectorAll(".widget")
+          document.querySelectorAll(".widget"),
         );
         if (!widgets.length) return;
 
@@ -1926,7 +1964,7 @@
           var ry = dx * MAX_TILT;
           var tz = Math.max(
             6,
-            Math.min(18, (1 - (Math.abs(dx) + Math.abs(dy)) / 2) * 18)
+            Math.min(18, (1 - (Math.abs(dx) + Math.abs(dy)) / 2) * 18),
           );
           t.target.rx = rx;
           t.target.ry = ry;
@@ -1950,7 +1988,8 @@
           widgets.forEach(function (w) {
             var t = w._tilt;
             if (!t) return;
-            var tiltEnabled = !document.body.classList.contains("tilt-disabled");
+            var tiltEnabled =
+              !document.body.classList.contains("tilt-disabled");
             var isActive = w.classList.contains("is-active") && tiltEnabled;
 
             if (isActive) updateTargetFromPointer(w);
@@ -2061,7 +2100,7 @@
               w._tilt.hasPending = true;
               ensureRaf();
             },
-            { passive: true }
+            { passive: true },
           );
 
           // keyboard accessibility
@@ -2096,15 +2135,16 @@
         document.addEventListener(
           "pointerdown",
           function (e) {
-            if (!e.target.closest || !e.target.closest(".widget")) clearActive();
+            if (!e.target.closest || !e.target.closest(".widget"))
+              clearActive();
           },
-          { passive: true }
+          { passive: true },
         );
       })();
       // Clock
       function getWeekNumber(date) {
         const d = new Date(
-          Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+          Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
         );
         const dayNum = d.getUTCDay() || 7;
         d.setUTCDate(d.getUTCDate() + 4 - dayNum);
@@ -2117,16 +2157,7 @@
       let lastDateKey = null;
       let lastGreetingPrefix = null;
 
-      const digitIds = [
-        "h1",
-        "h2",
-        "colon1",
-        "m1",
-        "m2",
-        "colon2",
-        "s1",
-        "s2",
-      ];
+      const digitIds = ["h1", "h2", "colon1", "m1", "m2", "colon2", "s1", "s2"];
       const digitElements = digitIds.map((id) => document.getElementById(id));
       const digitStates = new Map();
       const dateEl = document.getElementById("date");
@@ -2256,7 +2287,9 @@
       const shallowTotalEl = document.getElementById("work-shallow-total");
       const totalWorkedEl = document.getElementById("work-total-worked");
       const breakdownDeepEl = document.getElementById("work-breakdown-deep");
-      const breakdownShallowEl = document.getElementById("work-breakdown-shallow");
+      const breakdownShallowEl = document.getElementById(
+        "work-breakdown-shallow",
+      );
       const modeToggleEl = document.getElementById("work-mode-toggle");
       const saveStatusEl = document.getElementById("work-save-status");
       const toggleBtn = document.getElementById("toggle");
@@ -2270,7 +2303,7 @@
         const sec = s % 60;
         return `${String(h).padStart(2, "0")}:${String(m).padStart(
           2,
-          "0"
+          "0",
         )}:${String(sec).padStart(2, "0")}`;
       }
 
@@ -2315,8 +2348,7 @@
           seconds = parseFloat(sMatch[1]);
           matched = true;
         }
-        if (matched)
-          return Math.round(hours * 3600 + minutes * 60 + seconds);
+        if (matched) return Math.round(hours * 3600 + minutes * 60 + seconds);
         const num = parseFloat(t.replace(/[^0-9.]/g, ""));
         if (!isNaN(num)) return Math.round(num * 3600);
         return null;
@@ -2329,7 +2361,8 @@
       function updateDelta() {
         if (!deltaEl) return;
         const diff = targetSeconds - deepSeconds;
-        if (diff >= 0) deltaEl.textContent = `Deep remaining ${formatHMS(diff)}`;
+        if (diff >= 0)
+          deltaEl.textContent = `Deep remaining ${formatHMS(diff)}`;
         else deltaEl.textContent = `Deep over ${formatHMS(-diff)}`;
       }
 
@@ -2357,7 +2390,7 @@
                   hour: "2-digit",
                   minute: "2-digit",
                   second: "2-digit",
-                })
+                }),
             );
           }
         } catch (e) {
@@ -2392,12 +2425,13 @@
 
       function updateElapsedDisplay() {
         if (elapsedEl) elapsedEl.textContent = formatHMS(getActiveSeconds());
-        if (deepTotalEl) deepTotalEl.textContent = `Deep ${formatHM(deepSeconds)}`;
+        if (deepTotalEl)
+          deepTotalEl.textContent = `Deep ${formatHM(deepSeconds)}`;
         if (shallowTotalEl)
           shallowTotalEl.textContent = `Shallow ${formatHM(shallowSeconds)}`;
         if (totalWorkedEl)
           totalWorkedEl.textContent = `Total ${formatHM(
-            deepSeconds + shallowSeconds
+            deepSeconds + shallowSeconds,
           )}`;
         updateBreakdownBar();
         updateDelta();
@@ -2471,10 +2505,13 @@
 
       function restoreWorkState() {
         try {
-          const savedDeep = parseInt(localStorage.getItem(LS_WORK_DEEP) || "", 10);
+          const savedDeep = parseInt(
+            localStorage.getItem(LS_WORK_DEEP) || "",
+            10,
+          );
           const savedShallow = parseInt(
             localStorage.getItem(LS_WORK_SHALLOW) || "",
-            10
+            10,
           );
           if (!isNaN(savedDeep) && savedDeep >= 0) deepSeconds = savedDeep;
           if (!isNaN(savedShallow) && savedShallow >= 0)
@@ -2482,7 +2519,7 @@
           if (isNaN(savedDeep) && isNaN(savedShallow)) {
             const legacyElapsed = parseInt(
               localStorage.getItem(LS_WORK_ELAPSED) || "",
-              10
+              10,
             );
             if (!isNaN(legacyElapsed) && legacyElapsed >= 0)
               deepSeconds = legacyElapsed;
@@ -2490,11 +2527,10 @@
           const savedMode = localStorage.getItem(LS_WORK_MODE);
           if (savedMode === "deep" || savedMode === "shallow")
             activeMode = savedMode;
-          const savedRunning =
-            localStorage.getItem(LS_WORK_RUNNING) === "true";
+          const savedRunning = localStorage.getItem(LS_WORK_RUNNING) === "true";
           const lastStartMs = parseInt(
             localStorage.getItem(LS_WORK_LAST_START) || "",
-            10
+            10,
           );
           if (savedRunning) {
             if (!isNaN(lastStartMs) && lastStartMs > 0) {
@@ -2520,7 +2556,7 @@
       if (targetEl) {
         const savedTarget = parseInt(
           localStorage.getItem(LS_WORK_TARGET) || "",
-          10
+          10,
         );
         if (!isNaN(savedTarget) && savedTarget >= 0) {
           targetSeconds = savedTarget;
@@ -2670,7 +2706,10 @@
         function setIframeById(id) {
           if (!id) return;
           IFRAME.src = buildYouTubeUrl(id);
-          if (window._ytCompact && typeof window._ytCompact.setVideoId === "function")
+          if (
+            window._ytCompact &&
+            typeof window._ytCompact.setVideoId === "function"
+          )
             window._ytCompact.setVideoId(id);
         }
 
@@ -2735,7 +2774,7 @@
             // start wiggle loops gently
             // save intensity selection too
             var INTENSITY_SAVE = document.getElementById(
-              "enable-wiggle-intensity"
+              "enable-wiggle-intensity",
             );
             var intensityVal = INTENSITY_SAVE ? INTENSITY_SAVE.value : "medium";
             localStorage.setItem(LS_KEY_WIGGLE_INTENSITY, intensityVal);
@@ -2792,7 +2831,7 @@
           // reset intensity to medium
           localStorage.removeItem(LS_KEY_WIGGLE_INTENSITY);
           var INTENSITY_RST = document.getElementById(
-            "enable-wiggle-intensity"
+            "enable-wiggle-intensity",
           );
           if (INTENSITY_RST) INTENSITY_RST.value = "medium";
           window._wiggleIntensity = 1.0;
@@ -2865,7 +2904,8 @@
           const h = Math.floor(s / 3600);
           const m = Math.floor((s % 3600) / 60);
           const ss = s % 60;
-          if (h > 0) return `${h}:${String(m).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
+          if (h > 0)
+            return `${h}:${String(m).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
           return `${m}:${String(ss).padStart(2, "0")}`;
         }
 
@@ -2875,7 +2915,9 @@
 
         function updateToggleIcon(isPlaying) {
           if (!toggleIcon) return;
-          toggleIcon.className = isPlaying ? "fa-solid fa-pause" : "fa-solid fa-play";
+          toggleIcon.className = isPlaying
+            ? "fa-solid fa-pause"
+            : "fa-solid fa-play";
         }
 
         function updateProgress() {
