@@ -779,6 +779,13 @@
           animation: none;
         }
       }
+      /* Pause all infinite decorative animations when the tab is hidden to save CPU/battery */
+      body.page-hidden::after,
+      body.page-hidden .ink-ornament,
+      body.page-hidden .clock-display,
+      body.page-hidden .work-delta::after {
+        animation-play-state: paused;
+      }
       /* Adjust scale via CSS variable so 3D tilt (which uses transform) is not overwritten */
       .container:hover .widget {
         --scale: 0.996;
@@ -2035,7 +2042,7 @@
             anyActive = true;
           });
 
-          if (anyActive) rafId = requestAnimationFrame(tickAll);
+          if (anyActive && !document.hidden) rafId = requestAnimationFrame(tickAll);
         }
 
         function markAllRectsDirty() {
@@ -2261,7 +2268,13 @@
         previousDigits = [...newDigits];
         firstUpdate = false;
       }
-      setInterval(updateClock, 1000);
+      setInterval(function () {
+        if (!document.hidden) updateClock();
+      }, 1000);
+      // Catch up immediately when the tab becomes visible again
+      document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) updateClock();
+      });
       updateClock();
 
       // Work Tracker Timer
@@ -2881,6 +2894,29 @@
           mediaPref.addEventListener("change", onSystemPrefChange);
         else if (mediaPref && mediaPref.addListener)
           mediaPref.addListener(onSystemPrefChange);
+      })();
+    </script>
+    <script>
+      // Page-visibility: pause CSS animations and the wiggle RAF when tab is not visible
+      (function () {
+        function onVisibilityChange() {
+          if (document.hidden) {
+            document.body.classList.add("page-hidden");
+          } else {
+            document.body.classList.remove("page-hidden");
+            // Restart wiggle RAF if wiggle is enabled
+            if (
+              !document.body.classList.contains("wiggle-disabled") &&
+              window._cardControls &&
+              typeof window._cardControls.startAllWiggles === "function"
+            ) {
+              window._cardControls.startAllWiggles();
+            }
+          }
+        }
+        document.addEventListener("visibilitychange", onVisibilityChange);
+        // Apply initial state in case page loads in background
+        onVisibilityChange();
       })();
     </script>
     <script>
